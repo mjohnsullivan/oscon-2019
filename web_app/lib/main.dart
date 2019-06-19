@@ -17,7 +17,7 @@ const defaultTextStyle = TextStyle(
 const buttonTextStyle = TextStyle(
   fontFamily: 'RobotoMono',
   color: Colors.black,
-  fontSize: 32,
+  fontSize: 24,
 );
 
 const labelTextStyle = TextStyle(
@@ -26,6 +26,14 @@ const labelTextStyle = TextStyle(
   fontSize: 16,
 );
 
+final colorMap = {
+  'blue': Colors.blue,
+  'green': Colors.green,
+  'yellow': Colors.yellow,
+  'red': Colors.red
+};
+
+/// Stateful widget to manage voting state
 class VotesProvider extends StatefulWidget {
   VotesProvider({this.child});
   final Widget child;
@@ -108,6 +116,7 @@ class _VotesProviderState extends State<VotesProvider> {
       );
 }
 
+/// Inherited widget to make state available throughout the app
 class VotesConsumer extends InheritedWidget {
   VotesConsumer({
     @required this.messages,
@@ -129,11 +138,10 @@ class VotesConsumer extends InheritedWidget {
 }
 
 void main() {
-  runApp(MyApp());
+  runApp(VotingApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class VotingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -141,12 +149,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyWebPage(),
+      home: VotingPage(),
     );
   }
 }
 
-class MyWebPage extends StatelessWidget {
+/// Main page for the voting app
+class VotingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VotesProvider(
@@ -154,23 +163,19 @@ class MyWebPage extends StatelessWidget {
         body: DefaultTextStyle(
           style: defaultTextStyle,
           child: Center(
-            child: VotingPanel(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  VotingTile(),
+                  DatabaseMessage(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class VotingPanel extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        VotingTile(),
-        DatabaseMessage(),
-      ],
     );
   }
 }
@@ -193,14 +198,27 @@ class DatabaseMessage extends StatelessWidget {
 class VotingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
         VotingLabel('Vote for colour'),
-        VotingButton('blue'),
-        VotingButton('red'),
-        VotingButton('green'),
-        VotingButton('yellow'),
+        SizedBox(height: 10),
+        Container(
+          constraints: BoxConstraints(
+            maxHeight: 600,
+            maxWidth: 600,
+          ),
+          child: GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 5,
+            mainAxisSpacing: 5,
+            children: [
+              VotingButton('blue'),
+              VotingButton('red'),
+              VotingButton('green'),
+              VotingButton('yellow'),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -220,12 +238,9 @@ class VotingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final castVote = VotesConsumer.of(context).castVote;
     return FlatButton(
-        child: Text(
-          label,
-          style: buttonTextStyle,
-        ),
-        onPressed: () => castVote.add(label));
+        color: colorMap[label],
+        child: Text(label, style: buttonTextStyle),
+        onPressed: () => VotesConsumer.of(context).castVote.add(label));
   }
 }
