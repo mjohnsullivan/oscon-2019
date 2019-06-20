@@ -13,6 +13,17 @@ void main() {
   runApp(HighlightsApp());
 }
 
+void _resetDatabase() async {
+  final collection = Firestore.instance.collection('votes');
+  collection.getDocuments().then((query) => query.documents.forEach((doc) {
+        if (doc.data.containsKey('votes')) {
+          Firestore.instance
+              .document('votes/${doc.documentID}')
+              .setData({'votes': 0});
+        }
+      }));
+}
+
 class HighlightsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -40,23 +51,40 @@ class Votes extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<QuerySnapshot>(builder: (context, snapshot, _) {
       if (snapshot?.documents != null) {
-        return GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 5,
-          children: snapshot.documents.map<Widget>((d) {
-            final color = d.documentID;
-            final votes = d['votes'] as num;
-            return Card(
-              color: colorMap[color],
-              child:
-                  Center(child: Text('$votes', style: TextStyle(fontSize: 34))),
-            );
-          }).toList(),
+        return Column(
+          children: [
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
+                children: snapshot.documents.map<Widget>((d) {
+                  final color = d.documentID;
+                  final votes = d['votes'] as num;
+                  return Card(
+                    color: colorMap[color],
+                    child: Center(
+                        child: Text('$votes', style: TextStyle(fontSize: 34))),
+                  );
+                }).toList(),
+              ),
+            ),
+            ResetVotes(),
+          ],
         );
       } else {
         return Text('No data');
       }
     });
+  }
+}
+
+class ResetVotes extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: Text('Reset Database'),
+      onPressed: () => _resetDatabase(),
+    );
   }
 }
