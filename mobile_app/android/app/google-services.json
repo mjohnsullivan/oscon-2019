@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "150136682850",
+    "firebase_url": "https://oscon-voter.firebaseio.com",
+    "project_id": "oscon-voter",
+    "storage_bucket": "oscon-voter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150136682850:android:cfdeced317e8697e",
+        "android_client_info": {
+          "package_name": "com.example.mobile_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "150136682850-qucr6dp6bcd899bnb04phqtm7hqt9smd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr8x1IluFIKOrqg8HQA4z5OOa7ABfi9wc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "150136682850-qucr6dp6bcd899bnb04phqtm7hqt9smd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

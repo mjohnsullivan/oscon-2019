@@ -1,0 +1,40 @@
+<html>
+
+<head>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#config-web-app -->
+</head>
+
+<body></body>
+<script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyAG7wN-Zv4VgD6aSUP7N9xthvkZ6QKg3Rs",
+        authDomain: "oscon-voter.firebaseapp.com",
+        databaseURL: "https://oscon-voter.firebaseio.com",
+        projectId: "oscon-voter",
+        storageBucket: "",
+        messagingSenderId: "150136682850",
+        appId: "1:150136682850:web:d14f3a68ab2b79f0"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Firestore stuff
+    var db = firebase.firestore();
+
+    db.collection("votes").add({
+        color: "mauve"
+    })
+        .then(function (docRef) {
+            console.log("Document written with ID: ", docRef.id);
+        })
+        .catch(function (error) {
+            console.error("Error adding document: ", error);
+        });
+</script>
+
+</html>
