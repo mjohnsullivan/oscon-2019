@@ -24,23 +24,32 @@ class _LightsControlState extends State<LightsControl> {
     flutterBlue = FlutterBlue.instance;
     if (await flutterBlue.isAvailable) {
       scanForDevices();
-      flutterBlue = null;
     } else {
       setState(
           () => _displayPage = Text('This phone does not support bluetooth.'));
+      flutterBlue = null;
     }
   }
 
   void scanForDevices() {
-    var scanSubscription = flutterBlue.scan().listen((scanResult) {
-      // do something with scan result
-      // TODO(efortuna)
-      device = scanResult.device;
-      print('${device.name} found! rssi: ${scanResult.rssi}');
+    var devices = Map<DeviceIdentifier, ScanResult>();
+    flutterBlue
+        .scan(
+            timeout:
+                const Duration(seconds: 2) // need to be longer to connect? 5?
+            // UART service on the Adafruit Feather M0 Bluefruit...
+            /*withServices: [
+          new Guid('6E400001-B5A3-F393-­E0A9-­E50E24DCCA9E')
+        ],*/
+            )
+        .listen((ScanResult scanResult) {
+      devices[scanResult.device.id] = scanResult;
+    }, onDone: () {
+      setState(() => _displayPage = AvailableDevicesPage(devices, () {
+            setState(() => _displayPage = ScanningStatus());
+            scanForDevices();
+          }));
     });
-
-    /// Stop scanning
-    scanSubscription.cancel();
   }
 
   @override
@@ -108,5 +117,26 @@ class _LightControlState extends State<LightControl> {
         ),
       ],
     );
+  }
+}
+
+class AvailableDevicesPage extends StatelessWidget {
+  AvailableDevicesPage(this.availableBLEDevices, this.rescan);
+  final Map<DeviceIdentifier, ScanResult> availableBLEDevices;
+  final Function rescan;
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+        children: availableBLEDevices.values
+            //.where((result) => result.device.name.length > 0)
+            .map<Widget>((result) => ListTile(
+                  title: Text(result.device.name),
+                  subtitle: Text(result.device.id.toString()),
+                ))
+            .toList()
+              ..add(IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: rescan,
+              )));
   }
 }
