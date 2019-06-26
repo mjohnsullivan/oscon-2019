@@ -65,10 +65,19 @@ packages:
   flutter_blue:
     dependency: "direct main"
     description:
-      name: flutter_blue
+      path: "."
+      ref: HEAD
+      resolved-ref: f4e16b7250824276b31081322fb5347f0b1244b5
+      url: "https://github.com/efortuna/flutter_blue"
+    source: git
+    version: "0.6.1"
+  flutter_spinkit:
+    dependency: "direct main"
+    description:
+      name: flutter_spinkit
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0+1"
+    version: "3.1.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -116,6 +125,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.0"
+  progress_indicators:
+    dependency: "direct main"
+    description:
+      name: progress_indicators
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   protobuf:
     dependency: transitive
     description:

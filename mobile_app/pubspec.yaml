@@ -11,9 +11,13 @@ dependencies:
     sdk: flutter
   cloud_firestore: ^0.12.5
   provider: ^3.0.0
-  flutter_blue: ^0.6.0+1
+  flutter_blue:
+    git: 
+      url: https://github.com/efortuna/flutter_blue
   flutter_vector_icons: ^0.1.0
-  font_awesome_flutter: 8.4.0
+  font_awesome_flutter: ^8.4.0
+  flutter_spinkit: ^3.1.0
+  progress_indicators: ^0.1.2
 
 dev_dependencies:
   flutter_test:

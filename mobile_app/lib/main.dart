@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mobile_app/control_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart' as awesome;
-import 'package:flutter_blue/flutter_blue.dart';
 
 final colorMap = {
   'blue': Colors.blue,
@@ -111,59 +111,5 @@ class ResetVotes extends StatelessWidget {
       child: Text('Reset Database'),
       onPressed: () => _resetDatabase(),
     );
-  }
-}
-
-class LightsControl extends StatefulWidget {
-  @override
-  _LightsControlState createState() => _LightsControlState();
-}
-
-class _LightsControlState extends State<LightsControl> {
-  final int offSignal = 0x4e;
-  bool _on = false;
-  BluetoothDevice device;
-  FlutterBlue flutterBlue;
-  @override
-  void initState() {
-    super.initState();
-    flutterBlue = FlutterBlue.instance;
-  }
-
-  void scanForDevices() {
-    /// Start scanning
-    var scanSubscription = flutterBlue.scan().listen((scanResult) {
-      // do something with scan result
-      // TODO(efortuna)
-      device = scanResult.device;
-      print('${device.name} found! rssi: ${scanResult.rssi}');
-    });
-
-    /// Stop scanning
-    scanSubscription.cancel();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text('Turn on the lights!'),
-        Switch(
-          value: _on,
-          onChanged: (bool value) {
-            setState(() => _on = value);
-            // send the on/off signal: off: 0x4e
-          },
-          activeColor: Colors.orange,
-        ),
-      ],
-    );
-  }
-
-  writeToLights(List<int> instructions) async {
-    //TODO.
-    //device.writeCharacteristic(instructions, instructions,
-    //    type: CharacteristicWriteType.withResponse);
   }
 }
