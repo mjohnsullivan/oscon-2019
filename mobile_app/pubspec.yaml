@@ -12,6 +12,8 @@ dependencies:
   cloud_firestore: ^0.12.5
   provider: ^3.0.0
   flutter_blue: ^0.6.0+1
+  flutter_vector_icons: ^0.1.0
+  font_awesome_flutter: 8.4.0
 
 dev_dependencies:
   flutter_test:
