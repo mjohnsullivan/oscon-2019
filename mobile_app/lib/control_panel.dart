@@ -16,7 +16,6 @@ class BluetoothPage extends StatelessWidget {
 }
 
 class LightsControl extends StatelessWidget {
-  final int offSignal = 0x4e;
   final FlutterBlue flutterBlue = FlutterBlue.instance;
 
   void scanForDevices(BuildContext context) async {
@@ -56,12 +55,6 @@ class LightsControl extends StatelessWidget {
           return bluetoothState.page;
         }));
   }
-
-  writeToLights(List<int> instructions) async {
-    //TODO.
-    //device.writeCharacteristic(instructions, instructions,
-    //    type: CharacteristicWriteType.withResponse);
-  }
 }
 
 /// Simple page stating that we are scanning for devices.
@@ -96,7 +89,29 @@ class LightControl extends StatefulWidget {
 }
 
 class _LightControlState extends State<LightControl> {
-  bool _on = false;
+  bool _on = true;
+  final uartWriteCharacteristic = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+  final int offSignal = 0x4e;
+  final int yellowColor = 0x79;
+  BluetoothCharacteristic _characteristic;
+  @override
+  void initState() {
+    findCharacteristic();
+    super.initState();
+  }
+
+  findCharacteristic() async {
+    List<BluetoothService> services = await widget.device.discoverServices();
+
+    // worst API ever.
+    for (BluetoothService service in services) {
+      _characteristic = service.characteristics.firstWhere(
+          (BluetoothCharacteristic c) =>
+              c.uuid.toString() == uartWriteCharacteristic,
+          orElse: () => null);
+      if (_characteristic != null) break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +135,11 @@ class _LightControlState extends State<LightControl> {
               onChanged: (bool value) {
                 setState(() => _on = value);
                 // send the on/off signal: off: 0x4e
+                if (_on) {
+                  writeToLights([offSignal]);
+                } else {
+                  writeToLights([yellowColor]);
+                }
               },
               activeColor: Colors.orange,
             ),
@@ -127,6 +147,10 @@ class _LightControlState extends State<LightControl> {
         ),
       ],
     );
+  }
+
+  writeToLights(List<int> instructions) async {
+    _characteristic?.write(instructions);
   }
 }
 
@@ -142,7 +166,6 @@ class AvailableDevicesPage extends StatelessWidget {
                   title: Text(result.device.name),
                   subtitle: Text(result.device.id.toString()),
                   onTap: () async {
-                    // TODO: this seems not re-discoverable once I connect. Do I need to disconnect/ cancel or something?
                     await result.device
                         .connect(timeout: const Duration(seconds: 4));
                     Provider.of<state.BluetoothState>(context).setMode(
