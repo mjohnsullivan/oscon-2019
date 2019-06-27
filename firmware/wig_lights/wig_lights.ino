@@ -1,32 +1,5 @@
-
-/*********************************************************************
-  geekyjacket
-  by Eric Oesterle & Neil Heather
-
-  Built and presented at at DevCamp 2019 (Feb 1-3, 2019):
-  https://devca.mp/
-  This version targets the Adafruit Feather M0 Bluefruit, but should
-  be adaptable to other Bluefruit boards:
-  https://www.adafruit.com/product/2995
-
-  Designed to be controlled by a mobile app built on the Flutter
-  framework, which is also part of this project and our demo:
-  https://github.com/oesterle/geekyjacket
-
-  This version is based on bleuart_datamode.ino from Adafruit Industries:
-     This is an example for our nRF51822 based Bluefruit LE modules
-
-     Pick one up today in the adafruit shop!
-
-     Adafruit invests time and resources providing this open source code,
-     please support Adafruit and open-source hardware by purchasing
-     products from Adafruit!
-
-  MIT license, check LICENSE for more information
-  All text above, and the splash screen below must be included in
-  any redistribution
-*********************************************************************/
-
+// Some code adapted from the Adafruit Neopixel Strand-test, 
+// the bleuart_datamode.ino and geekyjacket by Eric Oesterle & Neil Heather
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -42,34 +15,20 @@
 
 #include <Adafruit_NeoPixel.h>
 
-uint8_t curCol = 114;
-
-
-// Set up NeoPixels. For the demo, we used about half of a 1m, 144-pixel
-// Adafruit NeoPixel strip. Specifically we used a mini skinny one, with
-// a white flexible PCB:
-//
-// "Adafruit Mini Skinny NeoPixel Digital RGB LED Strip - 144 LED/m - 1m WHITE"
-// https://www.adafruit.com/product/2969
-//
-// There is also a variant that has a black background, which reflects less
-// light, but would also be a bit less visible when off:
-//
-// Adafruit Mini Skinny NeoPixel Digital RGB LED Strip - 144 LED/m - 1m BLACK
-// https://www.adafruit.com/product/2970
-//
-// There are also less dense strips that are typically less expensive. This
-// one has a black background, and is 60 LED/meter:
-//
-// "Adafruit Mini Skinny NeoPixel Digital RGB LED Strip - 60 LED/m - BLACK"
-// https://www.adafruit.com/product/2964
+uint8_t currentMode = 114;
 
 #define STRIPLEN 15 // Length of LED strips
-#define PIN_START 5
-//#define PIN            6
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(STRIPLEN, PIN_START, NEO_RGBW);
-Adafruit_NeoPixel pixels2 = Adafruit_NeoPixel(STRIPLEN, PIN_START+1, NEO_RGBW);
-
+#define PIN_START 5 // The first of the set of pins that hold neopixel strips.
+#define NUM_STRIPS 2
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_START, NEO_RGBW);
+// Argument 1 = Number of pixels in NeoPixel strip
+// Argument 2 = Arduino pin number (most are valid)
+// Argument 3 = Pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
 /*=========================================================================
     APPLICATION SETTINGS
@@ -119,22 +78,18 @@ void error(const __FlashStringHelper*err) {
   while (1);
 }
 
-/**************************************************************************/
-/*!
-    @brief  Sets up the HW an the BLE module (this function is called
-            automatically on startup)
-*/
-/**************************************************************************/
+// setup() function -- runs once at startup --------------------------------
 void setup(void)
 {
   //while (!Serial);  // required for Flora & Micro
   delay(500);
 
-  pixels.begin();
-  pixels2.begin();
-
-  updatePixels();
-
+  strip.begin();
+  for (int pinNum = PIN_START; pinNum < NUM_STRIPS + PIN_START; pinNum++) {
+    strip.setPin(pinNum);
+    strip.show(); // Turn off all pixels to start.
+    strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  }
 
   Serial.begin(115200);
   Serial.println(F("Adafruit Bluefruit Command <-> Data Mode Example"));
@@ -202,14 +157,14 @@ void setup(void)
 
 uint16_t offset = 0;
 
-void updatePixels() {
+void updatePixels(int pinNum) {
   // Show the current color tag in the Serial Monitor.
   Serial.println("");
-  Serial.print("color tag: ");
-  Serial.println(curCol);
+  Serial.print("Current mode: ");
+  Serial.println(currentMode);
 
-  uint32_t aCol = pixels.Color(0, 0, 0, 0);  
-
+  uint32_t aCol = strip.Color(0, 0, 0, 0);  
+  strip.setPin(pinNum);
 
   // When change colors/animations based on a single character
   // coming over Bluetooth LE UART from the mobile device.
@@ -224,41 +179,36 @@ void updatePixels() {
   // we've hidden the NeoPixel strip behind a layer
   // of black chiffon.
   //
-  switch (curCol) {
+  switch (currentMode) {
     case 'r':
       Serial.println("red");
-      aCol = pixels.Color(128, 0, 0, 0);
+      aCol = strip.Color(128, 0, 0, 0);
       break;
     case 'y':
-      aCol = pixels.Color(128, 80, 0, 0);
+      aCol = strip.Color(128, 80, 0, 0);
       break;
     case 'g':
-      aCol = pixels.Color(0, 128, 0, 0);
+      aCol = strip.Color(0, 128, 0, 0);
       break;
     case 'b':
-      aCol = pixels.Color(0, 32, 128, 0);
+      aCol = strip.Color(0, 32, 128, 0);
       break;
     default:
       Serial.println("default");
-      aCol = pixels.Color(0, 0, 0, 0);
+      aCol = strip.Color(0, 0, 0, 0);
       break;
   }
 
   // first, turn off all the pixels
-  for (uint16_t j = 0; j < 80; j++) {
-    pixels.setPixelColor(j, pixels.Color(0, 0, 0, 0));
-    pixels2.setPixelColor(j, pixels.Color(0, 0, 0, 0));
+  for (uint16_t j = 0; j < STRIPLEN; j++) {
+    strip.setPixelColor(j, strip.Color(0, 0, 0, 0));
   }
 
-  if (curCol == 'a') {
+  if (currentMode == 'a') {
     // show our special sparkly white pattern
-    pixels.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
-    pixels.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
-    pixels.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
-
-    pixels2.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
-    pixels2.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
-    pixels2.setPixelColor(random(72), pixels.Color(255, 255, 255, 255));
+    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
+    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
+    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
     delay(50);
   } else {
     // Show a chosen color on 10 pixels. This 10-pixel segment
@@ -267,9 +217,9 @@ void updatePixels() {
     // offset causes some of the pixels to move off the end of the
     // strip, we don't get a range error. Yay.
     for (uint16_t i = 0; i < 10; i++) {
-      pixels.setPixelColor(i + offset, aCol);
-      pixels2.setPixelColor(i + offset, aCol);
+      strip.setPixelColor(i + offset, aCol);
     }
+    delay(20);
   }
 
   // Add one to the offset, and set it back to 0 when
@@ -277,13 +227,11 @@ void updatePixels() {
   offset = (offset + 1) % 72;
 
   // For performance reasons, the strip doesn't update until
-  // we do pixels.show():
-  pixels.show();
-  pixels2.show();
+  // we do strip.show():
+  strip.show();
 }
 
-void loop(void)
-{
+void pollBluetooth() {
   // Check for user input
   char n, inputs[BUFSIZE + 1];
 
@@ -302,18 +250,25 @@ void loop(void)
   // Echo received data
   while ( ble.available() )
   {
-    int c = ble.read();
+    int command = ble.read();
 
-    Serial.print((char)c);
+    Serial.print((char)command);
 
-    curCol = c;
+    currentMode = command;
 
     // Hex output too, helps w/debugging!
     Serial.print(" [0x");
-    if (c <= 0xF) Serial.print(F("0"));
-    Serial.print(c, HEX);
+    if (command <= 0xF) Serial.print(F("0"));
+    Serial.print(command, HEX);
     Serial.print("] ");
   }
+}
 
-  updatePixels();
+void loop(void)
+{
+  pollBluetooth();
+
+  for (int pinNum = PIN_START; pinNum < NUM_STRIPS + PIN_START; pinNum++) {
+    updatePixels(pinNum);
+  }
 }
