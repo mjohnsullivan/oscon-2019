@@ -89,10 +89,11 @@ class LightControl extends StatefulWidget {
 }
 
 class _LightControlState extends State<LightControl> {
-  bool _on = true;
+  bool _on = false;
   final uartWriteCharacteristic = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
   final int offSignal = 0x4e;
   final int yellowColor = 0x79;
+  final int sparkle = 0x61;
   BluetoothCharacteristic _characteristic;
   @override
   void initState() {
@@ -115,6 +116,9 @@ class _LightControlState extends State<LightControl> {
 
   @override
   Widget build(BuildContext context) {
+    var sparkleStar = SpinKitPulse(
+      itemBuilder: (_, __) => Icon(Icons.star),
+    );
     return Column(
       children: <Widget>[
         AppBar(
@@ -130,21 +134,36 @@ class _LightControlState extends State<LightControl> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Turn on the lights!'),
-            Switch(
-              value: _on,
-              onChanged: (bool value) {
-                setState(() => _on = value);
-                // send the on/off signal: off: 0x4e
-                if (_on) {
-                  writeToLights([offSignal]);
-                } else {
-                  writeToLights([yellowColor]);
-                }
-              },
-              activeColor: Colors.orange,
+            Padding(
+              padding: const EdgeInsets.only(top: 50, bottom: 50),
+              child: Switch(
+                value: _on,
+                onChanged: (bool value) {
+                  setState(() => _on = value);
+                  // send the on/off signal: off: 0x4e
+                  if (_on) {
+                    writeToLights([offSignal]);
+                  } else {
+                    writeToLights([yellowColor]);
+                  }
+                },
+                activeColor: Colors.orange,
+              ),
             ),
           ],
         ),
+        RaisedButton(
+          color: Colors.yellow,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              sparkleStar,
+              Text('Make it sparkle'),
+              sparkleStar,
+            ],
+          ),
+          onPressed: () => writeToLights([sparkle]),
+        )
       ],
     );
   }
