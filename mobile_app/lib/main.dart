@@ -49,7 +49,7 @@ class HighlightsPages extends StatefulWidget {
 
 class _HighlightsPagesState extends State<HighlightsPages> {
   int _selectedIndex = 0;
-  final _pages = [Votes(), LightsControl()];
+  final _pages = [Votes(), BluetoothPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -79,19 +79,23 @@ class Votes extends StatelessWidget {
         return Column(
           children: [
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 5,
-                children: snapshot.documents.map<Widget>((d) {
-                  final color = d.documentID;
-                  final votes = d['votes'] as num;
-                  return Card(
-                    color: colorMap[color],
-                    child: Center(
-                        child: Text('$votes', style: TextStyle(fontSize: 34))),
-                  );
-                }).toList(),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5,
+                  mainAxisSpacing: 5,
+                  children: snapshot.documents.map<Widget>((d) {
+                    final color = d.documentID;
+                    final votes = d['votes'] as num;
+                    return Card(
+                      color: colorMap[color],
+                      child: Center(
+                          child:
+                              Text('$votes', style: TextStyle(fontSize: 34))),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             ResetVotes(),

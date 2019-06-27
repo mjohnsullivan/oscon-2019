@@ -1,66 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:mobile_app/bluetooth_state.dart' as state;
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class LightsControl extends StatefulWidget {
+class BluetoothPage extends StatelessWidget {
   @override
-  _LightsControlState createState() => _LightsControlState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      builder: (_) => state.BluetoothState(),
+      child: LightsControl(),
+    );
+  }
 }
 
-class _LightsControlState extends State<LightsControl> {
+class LightsControl extends StatelessWidget {
   final int offSignal = 0x4e;
-  BluetoothDevice device;
-  FlutterBlue flutterBlue;
-  Widget _displayPage;
-  @override
-  void initState() {
-    super.initState();
-    initBluetooth();
-    _displayPage = ScanningStatus();
-  }
+  final FlutterBlue flutterBlue = FlutterBlue.instance;
 
-  void initBluetooth() async {
-    flutterBlue = FlutterBlue.instance;
+  void scanForDevices(BuildContext context) async {
     if (await flutterBlue.isAvailable) {
-      scanForDevices();
-    } else {
-      setState(
-          () => _displayPage = Text('This phone does not support bluetooth.'));
-      flutterBlue = null;
-    }
-  }
-
-  void scanForDevices() {
-    var devices = Map<DeviceIdentifier, ScanResult>();
-    flutterBlue
-        .scan(
-            timeout:
-                const Duration(seconds: 2) // need to be longer to connect? 5?
-            // UART service on the Adafruit Feather M0 Bluefruit...
-            /*withServices: [
+      var devices = Map<DeviceIdentifier, ScanResult>();
+      flutterBlue
+          .scan(
+              timeout:
+                  const Duration(seconds: 2) // need to be longer to connect? 5?
+              // UART service on the Adafruit Feather M0 Bluefruit...
+              /*withServices: [
           new Guid('6E400001-B5A3-F393-­E0A9-­E50E24DCCA9E')
         ],*/
-            )
-        .listen((ScanResult scanResult) {
-      devices[scanResult.device.id] = scanResult;
-    }, onDone: () {
-      setState(() => _displayPage = AvailableDevicesPage(devices, () {
-            setState(() => _displayPage = ScanningStatus());
-            scanForDevices();
-          }));
-    });
+              )
+          .listen((ScanResult scanResult) {
+        devices[scanResult.device.id] = scanResult;
+      }, onDone: () {
+        Provider.of<state.BluetoothState>(context).setMode(
+            state.BleAppState.deviceList, AvailableDevicesPage(devices));
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
         /*layoutBuilder: (Widget currentChild, List<Widget> previousChildren) {
-          // TODO(efortuna); add a slide in effect.
-          return SlideTransition();
-        },*/
+            // TODO(efortuna); add a slide in effect.
+            return SlideTransition();
+          },*/
         duration: Duration(milliseconds: 500),
-        child: _displayPage);
+        child: Consumer<state.BluetoothState>(builder: (BuildContext context,
+            state.BluetoothState bluetoothState, Widget child) {
+          if (bluetoothState.currentState == state.BleAppState.searching) {
+            scanForDevices(context);
+          }
+          return bluetoothState.page;
+        }));
   }
 
   writeToLights(List<int> instructions) async {
@@ -70,7 +64,8 @@ class _LightsControlState extends State<LightsControl> {
   }
 }
 
-class ScanningStatus extends StatelessWidget {
+/// Simple page stating that we are scanning for devices.
+class ScanningPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -94,6 +89,8 @@ class ScanningStatus extends StatelessWidget {
 }
 
 class LightControl extends StatefulWidget {
+  LightControl(this.device);
+  final BluetoothDevice device;
   @override
   _LightControlState createState() => _LightControlState();
 }
@@ -103,17 +100,30 @@ class _LightControlState extends State<LightControl> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: <Widget>[
-        Text('Turn on the lights!'),
-        Switch(
-          value: _on,
-          onChanged: (bool value) {
-            setState(() => _on = value);
-            // send the on/off signal: off: 0x4e
+        AppBar(
+            leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            widget.device.disconnect();
+            Provider.of<state.BluetoothState>(context)
+                .setMode(state.BleAppState.searching);
           },
-          activeColor: Colors.orange,
+        )),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Turn on the lights!'),
+            Switch(
+              value: _on,
+              onChanged: (bool value) {
+                setState(() => _on = value);
+                // send the on/off signal: off: 0x4e
+              },
+              activeColor: Colors.orange,
+            ),
+          ],
         ),
       ],
     );
@@ -121,22 +131,30 @@ class _LightControlState extends State<LightControl> {
 }
 
 class AvailableDevicesPage extends StatelessWidget {
-  AvailableDevicesPage(this.availableBLEDevices, this.rescan);
+  AvailableDevicesPage(this.availableBLEDevices);
   final Map<DeviceIdentifier, ScanResult> availableBLEDevices;
-  final Function rescan;
   @override
   Widget build(BuildContext context) {
     return ListView(
         children: availableBLEDevices.values
-            //.where((result) => result.device.name.length > 0)
+            .where((result) => result.device.name.length > 0)
             .map<Widget>((result) => ListTile(
                   title: Text(result.device.name),
                   subtitle: Text(result.device.id.toString()),
+                  onTap: () async {
+                    // TODO: this seems not re-discoverable once I connect. Do I need to disconnect/ cancel or something?
+                    await result.device
+                        .connect(timeout: const Duration(seconds: 4));
+                    Provider.of<state.BluetoothState>(context).setMode(
+                        state.BleAppState.connected,
+                        LightControl(result.device));
+                  },
                 ))
             .toList()
               ..add(IconButton(
                 icon: Icon(Icons.refresh),
-                onPressed: rescan,
+                onPressed: () => Provider.of<state.BluetoothState>(context)
+                    .setMode(state.BleAppState.searching),
               )));
   }
 }
