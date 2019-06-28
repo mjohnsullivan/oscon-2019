@@ -17,10 +17,13 @@
 
 uint8_t currentMode = 114;
 
+// The board pins that are connected to Neopixel strips.
+static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
 #define STRIPLEN 15 // Length of LED strips
-#define PIN_START 5 // The first of the set of pins that hold neopixel strips.
-#define NUM_STRIPS 2
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_START, NEO_RGBW);
+//#define PIN_START 5 // The first of the set of pins that hold neopixel strips.
+#define NUM_PINS 5 // the number of pins that are connected to neopixel strips.
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_NUMBERS[0], NEO_RGBW);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -85,8 +88,8 @@ void setup(void)
   delay(500);
 
   strip.begin();
-  for (int pinNum = PIN_START; pinNum < NUM_STRIPS + PIN_START; pinNum++) {
-    strip.setPin(pinNum);
+  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+    strip.setPin(PIN_NUMBERS[pin_index]);
     strip.show(); // Turn off all pixels to start.
     strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
   }
@@ -268,7 +271,7 @@ void loop(void)
 {
   pollBluetooth();
 
-  for (int pinNum = PIN_START; pinNum < NUM_STRIPS + PIN_START; pinNum++) {
-    updatePixels(pinNum);
+  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+    updatePixels(PIN_NUMBERS[pin_index]);
   }
 }
