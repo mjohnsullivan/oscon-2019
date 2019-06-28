@@ -182,16 +182,16 @@ void updatePixels(int pinNum) {
   switch (currentMode) {
     case 'r':
       Serial.println("red");
-      aCol = strip.Color(128, 0, 0, 0);
-      break;
-    case 'y':
-      aCol = strip.Color(128, 80, 0, 0);
-      break;
-    case 'g':
       aCol = strip.Color(0, 128, 0, 0);
       break;
+    case 'y':
+      aCol = strip.Color(128, 128, 0, 0);
+      break;
+    case 'g':
+      aCol = strip.Color(128, 0, 0, 0);
+      break;
     case 'b':
-      aCol = strip.Color(0, 32, 128, 0);
+      aCol = strip.Color(0, 0, 128, 0);
       break;
     default:
       Serial.println("default");
