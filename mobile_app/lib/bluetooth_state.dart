@@ -32,7 +32,6 @@ class BluetoothState with ChangeNotifier {
     var done = Completer<Map<DeviceIdentifier, ScanResult>>();
     if (await flutterBlue.isAvailable) {
       if (!await flutterBlue.isScanning.first) {
-        print('SCANNING AGAIN=====');
         devices.clear();
         flutterBlue
             .scan(

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
   @override
@@ -35,7 +36,6 @@ class ScanningPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Scaffold(body: AvailableDevices(snapshot.data));
-          print('hoooooooo');
           return Scaffold(
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -87,8 +87,8 @@ class LightControl extends StatefulWidget {
 class _LightControlState extends State<LightControl> {
   bool _on = false;
   final int offSignal = 0x4e;
-  final int yellowColor = 0x79;
-  final int sparkle = 0x61;
+  final int yellowColor = AsciiCodec().encode('y')[0];
+  final int sparkle = AsciiCodec().encode('s')[0];
 
   @override
   Widget build(BuildContext context) {

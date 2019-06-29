@@ -325,7 +325,10 @@ void updatePixels() {
 void loop(void)
 {
   pollBluetooth();
-  pixelLine(strip.Color(0, 0, 128, 0));
-  strip.show();
-  //drawPixels();
+  // it's too slow to do all simultaneously. so  fill it up, and then pick a random one to do the effect to. then fill it up again.
+  // or have all off and do effect to.
+  //TODO
+  //pixelLine(strip.Color(0, 0, 128, 0));
+  //strip.show();
+  drawPixels();
 }
