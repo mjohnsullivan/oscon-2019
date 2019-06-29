@@ -15,12 +15,20 @@
 
 #include <Adafruit_NeoPixel.h>
 
-uint8_t currentMode = 114;
+// Communication protocol:
+// 'r' = red
+// 'b' = blue
+// 'y' = yellow
+// 'g' = green
+// 's' = sparkles
+// 'w' = rainbow
+// Any other character sets all pixels to off.
+// TODO(efortuna): start with rainbow on.
+uint8_t currentMode = 'g';
 
 // The board pins that are connected to Neopixel strips.
 static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
 #define STRIPLEN 15 // Length of LED strips
-//#define PIN_START 5 // The first of the set of pins that hold neopixel strips.
 #define NUM_PINS 5 // the number of pins that are connected to neopixel strips.
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_NUMBERS[0], NEO_RGBW);
@@ -159,79 +167,75 @@ void setup(void)
 /**************************************************************************/
 
 uint16_t offset = 0;
+long firstPixelHue = 0;
 
-void updatePixels(int pinNum) {
+// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+void rainbow() {
+  // Hue of first pixel runs 5 complete loops through the color wheel.
+  // Color wheel has a range of 65536 but it's OK if we roll over, so
+  // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
+  // means we'll make 5*65536/256 = 1280 passes through this outer loop:
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+    
+      for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+        // Offset pixel hue by an amount to make one full revolution of the
+        // color wheel (range of 65536) along the length of the strip
+        // (strip.numPixels() steps):
+        int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+        // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
+        // optionally add saturation and value (brightness) (each 0 to 255).
+        // Here we're using just the single-argument hue variant. The result
+        // is passed through strip.gamma32() to provide 'truer' colors
+        // before assigning to each pixel:
+        strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
+      }
+      strip.show(); // Update strip with new contents
+      delay(1);  // Pause for a moment
+    }
+  }
+}
+
+void pixelLine(int color) {
+  strip.clear();
+  // Show a chosen color on 10 pixels. This 10-pixel segment
+  // moves across the strip, using an offset.
+  // The Adafruit_NeoPixel library is forgiving: when this
+  // offset causes some of the pixels to move off the end of the
+  // strip, we don't get a range error. Yay.
+  for (uint16_t i = 0; i < 10; i++) {
+    strip.setPixelColor(i + offset, color);
+  }
+  delay(150);
+  // Add one to the offset, and set it back to 0 when
+  // we reach the end.
+  offset = (offset + 1) % (STRIPLEN);
+}
+
+void sparkle(int color) {
+  strip.clear();
+
+  strip.setPixelColor(random(STRIPLEN), color);
+  strip.setPixelColor(random(STRIPLEN), color);
+  strip.setPixelColor(random(STRIPLEN), color);
+  strip.setPixelColor(random(STRIPLEN), color);
+  delay(50);
+}
+
+void drawPixels() {
   // Show the current color tag in the Serial Monitor.
   Serial.println("");
   Serial.print("Current mode: ");
   Serial.println(currentMode);
 
-  uint32_t aCol = strip.Color(0, 0, 0, 0);  
-  strip.setPin(pinNum);
-
-  // When change colors/animations based on a single character
-  // coming over Bluetooth LE UART from the mobile device.
-  // In our first demo, since we are building the mobile app
-  // in Google's Flutter, we used the Google brand colors,
-  // red: 'r', yellow: 'y', green: 'g', and blue: 'b'
-  //
-  // We also have a special sparkly white pattern: 'a'.
-  //
-  // Any other character sets all pixels to off, and
-  // our jacket looks like any normal jacket, since
-  // we've hidden the NeoPixel strip behind a layer
-  // of black chiffon.
-  //
   switch (currentMode) {
-    case 'r':
-      Serial.println("red");
-      aCol = strip.Color(0, 128, 0, 0);
-      break;
-    case 'y':
-      aCol = strip.Color(128, 128, 0, 0);
-      break;
-    case 'g':
-      aCol = strip.Color(128, 0, 0, 0);
-      break;
-    case 'b':
-      aCol = strip.Color(0, 0, 128, 0);
-      break;
-    default:
-      Serial.println("default");
-      aCol = strip.Color(0, 0, 0, 0);
-      break;
+    case 'w':
+      rainbow();
+    default: 
+      updatePixels();
   }
-
-  // first, turn off all the pixels
-  for (uint16_t j = 0; j < STRIPLEN; j++) {
-    strip.setPixelColor(j, strip.Color(0, 0, 0, 0));
-  }
-
-  if (currentMode == 'a') {
-    // show our special sparkly white pattern
-    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
-    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
-    strip.setPixelColor(random(72), strip.Color(255, 255, 255, 255));
-    delay(50);
-  } else {
-    // Show a chosen color on 10 pixels. This 10-pixel segment
-    // moves across the strip, using an offset.
-    // The Adafruit_NeoPixel library is forgiving: when this
-    // offset causes some of the pixels to move off the end of the
-    // strip, we don't get a range error. Yay.
-    for (uint16_t i = 0; i < 10; i++) {
-      strip.setPixelColor(i + offset, aCol);
-    }
-    delay(20);
-  }
-
-  // Add one to the offset, and set it back to 0 when
-  // we reach the end.
-  offset = (offset + 1) % 72;
-
-  // For performance reasons, the strip doesn't update until
-  // we do strip.show():
-  strip.show();
 }
 
 void pollBluetooth() {
@@ -267,11 +271,61 @@ void pollBluetooth() {
   }
 }
 
+void updatePixels() {
+  
+  uint32_t aCol = strip.Color(0, 0, 0, 0);  
+
+  // When change colors/animations based on a single character
+  // coming over Bluetooth LE UART from the mobile device.
+  // red: 'r', yellow: 'y', green: 'g', and blue: 'b'
+  //
+  // We also have a special sparkly white pattern: 's'.
+  //
+  // Any other character sets all pixels to off.
+  switch (currentMode) {
+    case 'r':
+      Serial.println("red");
+      aCol = strip.Color(0, 128, 0, 0);
+      break;
+    case 'y':
+      aCol = strip.Color(128, 128, 0, 0);
+      break;
+    case 'g':
+      aCol = strip.Color(128, 0, 0, 0);
+      break;
+    case 'b':
+      aCol = strip.Color(0, 0, 128, 0);
+      break;
+    default:
+      Serial.println("default");
+      aCol = strip.Color(0, 0, 0, 0);
+      break;
+  }
+
+  if (currentMode == 's') {
+    // for performance reasons (otherwise our little board can't keep up) 
+    // we do this loop in here, rather than at the highest level.
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+      sparkle(strip.Color(255, 255, 255, 255));
+      strip.show();
+    }
+  } else {
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+      pixelLine(aCol);
+      strip.show();
+    }
+  }
+  
+}
+
 void loop(void)
 {
   pollBluetooth();
-
-  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
-    updatePixels(PIN_NUMBERS[pin_index]);
-  }
+  pixelLine(strip.Color(0, 0, 128, 0));
+  strip.show();
+  //drawPixels();
 }

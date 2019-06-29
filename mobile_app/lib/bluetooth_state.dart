@@ -1,35 +1,78 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/control_panel.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+import 'dart:async';
 
 enum BleAppState {
   searching,
-  deviceList,
   connected,
   invalid,
+  failedToConnect,
 }
 
 class BluetoothState with ChangeNotifier {
   BleAppState _currentState = BleAppState.searching;
-  Widget page = ScanningPage();
+  final FlutterBlue flutterBlue = FlutterBlue.instance;
+  final devices = Map<DeviceIdentifier, ScanResult>();
+  final uartWriteCharacteristic = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+  BluetoothCharacteristic _characteristic;
 
-  /// Operates as a state-machine based on whether we have found and connected to a BLE device.
-  /// [customNewPage] is specifiable for pages that require configuration specific input to instantiate.
-  void setMode(BleAppState newState, [Widget customNewPage]) {
-    _currentState = newState;
-    switch (newState) {
-      case BleAppState.invalid:
-        page = Text('This device does not support bluetooth.');
-        break;
-      case BleAppState.deviceList:
-        page = customNewPage;
-        break;
-      case BleAppState.connected:
-        page = customNewPage;
-        break;
-      case BleAppState.searching:
-        page = ScanningPage();
+  Future<void> connectToDevice(BluetoothDevice device) async {
+    try {
+      await device.connect(timeout: const Duration(seconds: 5));
+      setMode(BleAppState.connected);
+      _findCharacteristic(device);
+    } on TimeoutException {
+      setMode(BleAppState.failedToConnect);
     }
+  }
+
+  Stream<Map<DeviceIdentifier, ScanResult>> scanForDevices() async* {
+    yield null;
+    var done = Completer<Map<DeviceIdentifier, ScanResult>>();
+    if (await flutterBlue.isAvailable) {
+      if (!await flutterBlue.isScanning.first) {
+        print('SCANNING AGAIN=====');
+        devices.clear();
+        flutterBlue
+            .scan(
+                timeout:
+                    const Duration(seconds: 2) // need longer to connect? 5?
+                // UART service on the Adafruit Feather M0 Bluefruit...
+                /*withServices: [
+          new Guid('6E400001-B5A3-F393-­E0A9-­E50E24DCCA9E')
+        ],*/
+                )
+            .listen((ScanResult scanResult) {
+          devices[scanResult.device.id] = scanResult;
+        }, onDone: () => done.complete(devices));
+      }
+    } else {
+      setMode(BleAppState.invalid);
+    }
+    yield await done.future;
+  }
+
+  sendMessage(int instruction) async {
+    _characteristic?.write([instruction]);
+  }
+
+  /// Find the UART Write characteristic to send messages between the app and the BLE devicd
+  _findCharacteristic(BluetoothDevice device) async {
+    List<BluetoothService> services = await device.discoverServices();
+
+    // worst API ever.
+    for (BluetoothService service in services) {
+      _characteristic = service.characteristics.firstWhere(
+          (BluetoothCharacteristic c) =>
+              c.uuid.toString() == uartWriteCharacteristic,
+          orElse: () => null);
+      if (_characteristic != null) break;
+    }
+  }
+
+  void setMode(BleAppState newState) {
+    _currentState = newState;
     notifyListeners();
   }
 

@@ -1,119 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobile_app/control_panel.dart';
+import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart' as awesome;
 
-final colorMap = {
-  'blue': Colors.blue,
-  'green': Colors.green,
-  'yellow': Colors.yellow,
-  'red': Colors.red
-};
-
 void main() {
-  runApp(HighlightsApp());
+  runApp(WearablesApp());
 }
 
-void _resetDatabase() async {
-  final collection = Firestore.instance.collection('votes');
-  collection.getDocuments().then((query) => query.documents.forEach((doc) {
-        if (doc.data.containsKey('votes')) {
-          Firestore.instance
-              .document('votes/${doc.documentID}')
-              .setData({'votes': 0});
-        }
-      }));
-}
-
-class HighlightsApp extends StatelessWidget {
+class WearablesApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return StreamProvider<QuerySnapshot>(
-      builder: (context) => Firestore.instance.collection('votes').snapshots(),
-      child: MaterialApp(
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: HighlightsPages(),
-      ),
+  _WearablesAppState createState() => _WearablesAppState();
+}
+
+class _WearablesAppState extends State<WearablesApp> {
+  Route routeFactory(RouteSettings settings) {
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (BuildContext context) {
+        switch (settings.name) {
+          case '/':
+            return Votes();
+          case '/Votes':
+            return Votes();
+          case '/Lights':
+            return BluetoothPage();
+          case '/failedToConnect':
+            return FailedToConnect();
+          case '/lightControl':
+            return LightControl();
+        }
+      },
     );
   }
-}
 
-class HighlightsPages extends StatefulWidget {
-  @override
-  _HighlightsPagesState createState() => _HighlightsPagesState();
-}
-
-class _HighlightsPagesState extends State<HighlightsPages> {
   int _selectedIndex = 0;
   final _pages = [Votes(), BluetoothPage()];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: _pages[_selectedIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-              title: Text('Votes'),
-              icon: Icon(awesome.FontAwesomeIcons.voteYea)),
-          BottomNavigationBarItem(
-              title: Text('Lights'),
-              icon: Icon(MaterialCommunityIcons.lightbulb_on_outline))
-        ],
-        onTap: (int index) => setState(() => _selectedIndex = index),
-        currentIndex: _selectedIndex,
-      ),
-    );
-  }
-}
-
-class Votes extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<QuerySnapshot>(builder: (context, snapshot, _) {
-      if (snapshot?.documents != null) {
-        return Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
-                  children: snapshot.documents.map<Widget>((d) {
-                    final color = d.documentID;
-                    final votes = d['votes'] as num;
-                    return Card(
-                      color: colorMap[color],
-                      child: Center(
-                          child:
-                              Text('$votes', style: TextStyle(fontSize: 34))),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            ResetVotes(),
-          ],
-        );
-      } else {
-        return Text('No data');
-      }
-    });
-  }
-}
-
-class ResetVotes extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      child: Text('Reset Database'),
-      onPressed: () => _resetDatabase(),
-    );
+    return StreamProvider<QuerySnapshot>(
+        builder: (context) =>
+            Firestore.instance.collection('votes').snapshots(),
+        child: MaterialApp(
+            home: Scaffold(
+          body: Center(child: _pages[_selectedIndex]),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const [
+              BottomNavigationBarItem(
+                  title: Text('Votes'),
+                  icon: Icon(awesome.FontAwesomeIcons.voteYea)),
+              BottomNavigationBarItem(
+                  title: Text('Lights'),
+                  icon: Icon(MaterialCommunityIcons.lightbulb_on_outline))
+            ],
+            onTap: (int index) => setState(() => _selectedIndex = index),
+            currentIndex: _selectedIndex,
+          ),
+        )));
   }
 }
