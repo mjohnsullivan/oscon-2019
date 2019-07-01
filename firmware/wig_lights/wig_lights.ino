@@ -198,9 +198,6 @@ void pixelLine(int color) {
     strip.setPixelColor(i + offset, color);
   }
   delay(150);
-  // Add one to the offset, and set it back to 0 when
-  // we reach the end.
-  offset = (offset + 1) % (STRIPLEN);
 }
 
 void sparkle(int color) {
@@ -307,6 +304,9 @@ void updatePixels() {
       pixelLine(aCol);
       strip.show();
     }
+    // Add one to the offset, and set it back to 0 when
+    // we reach the end.
+    offset = (offset + 1) % (STRIPLEN);
   }
   
 }
