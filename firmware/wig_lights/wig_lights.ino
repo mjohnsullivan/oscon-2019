@@ -24,12 +24,13 @@
 // 'w' = rainbow
 // Any other character sets all pixels to off.
 // TODO(efortuna): start with rainbow on.
-uint8_t currentMode = 'g';
+uint8_t currentMode = 'b';
 
 // The board pins that are connected to Neopixel strips.
 static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
 #define STRIPLEN 15 // Length of LED strips
 #define NUM_PINS 5 // the number of pins that are connected to neopixel strips.
+
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_NUMBERS[0], NEO_RGBW);
 // Argument 1 = Number of pixels in NeoPixel strip
@@ -91,8 +92,7 @@ void error(const __FlashStringHelper*err) {
 
 // setup() function -- runs once at startup --------------------------------
 void setup(void)
-{
-  //while (!Serial);  // required for Flora & Micro
+{ 
   delay(500);
 
   strip.begin();
@@ -103,9 +103,6 @@ void setup(void)
   }
 
   Serial.begin(115200);
-  Serial.println(F("Adafruit Bluefruit Command <-> Data Mode Example"));
-  Serial.println(F("------------------------------------------------"));
-
   /* Initialise the module */
   Serial.print(F("Initialising the Bluefruit LE module: "));
 
@@ -126,14 +123,6 @@ void setup(void)
 
   /* Disable command echo from Bluefruit */
   ble.echo(false);
-
-  Serial.println("Requesting Bluefruit info:");
-  /* Print Bluefruit information */
-  ble.info();
-
-  Serial.println(F("Please use Adafruit Bluefruit LE app to connect in UART mode"));
-  Serial.println(F("Then Enter characters to send to Bluefruit"));
-  Serial.println();
 
   ble.verbose(false);  // debug info is a little annoying after this point!
 

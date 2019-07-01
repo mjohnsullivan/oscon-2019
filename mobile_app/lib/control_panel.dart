@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
+import 'package:mobile_app/support_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -89,6 +90,7 @@ class _LightControlState extends State<LightControl> {
   final int offSignal = 0x4e;
   final int yellowColor = AsciiCodec().encode('y')[0];
   final int sparkle = AsciiCodec().encode('s')[0];
+  final int rainbow = AsciiCodec().encode('w')[0];
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +133,13 @@ class _LightControlState extends State<LightControl> {
             ],
           ),
           onPressed: () => bluetooth.sendMessage(sparkle),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: RainbowButton(
+            text: 'Rainbow',
+            onPressed: () => bluetooth.sendMessage(rainbow),
+          ),
         )
       ],
     );

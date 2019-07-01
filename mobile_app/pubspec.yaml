@@ -25,3 +25,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/diagonal_rainbow_gradient.jpg
+    - assets/diagonal_rainbow_gradient2.jpg
