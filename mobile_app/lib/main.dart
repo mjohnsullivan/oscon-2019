@@ -16,26 +16,6 @@ class WearablesApp extends StatefulWidget {
 }
 
 class _WearablesAppState extends State<WearablesApp> {
-  Route routeFactory(RouteSettings settings) {
-    return MaterialPageRoute(
-      settings: settings,
-      builder: (BuildContext context) {
-        switch (settings.name) {
-          case '/':
-            return Votes();
-          case '/Votes':
-            return Votes();
-          case '/Lights':
-            return BluetoothPage();
-          case '/failedToConnect':
-            return FailedToConnect();
-          case '/lightControl':
-            return LightControl();
-        }
-      },
-    );
-  }
-
   int _selectedIndex = 0;
   final _pages = [Votes(), BluetoothPage()];
 

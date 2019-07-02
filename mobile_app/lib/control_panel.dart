@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
 import 'package:mobile_app/support_widgets.dart';
@@ -88,9 +89,36 @@ class LightControl extends StatefulWidget {
 class _LightControlState extends State<LightControl> {
   bool _on = false;
   final int offSignal = 0x4e;
-  final int yellowColor = AsciiCodec().encode('y')[0];
+  final Map<String, int> colorCodeMap = {
+    'blue': AsciiCodec().encode('b')[0],
+    'green': AsciiCodec().encode('g')[0],
+    'red': AsciiCodec().encode('r')[0],
+    'yellow': AsciiCodec().encode('y')[0],
+  };
+  final int lightSpill = AsciiCodec().encode('l')[0];
   final int sparkle = AsciiCodec().encode('s')[0];
   final int rainbow = AsciiCodec().encode('w')[0];
+  String _currentColor = 'blue';
+
+  void updateMostPopularColor(
+      BluetoothState bluetooth, QuerySnapshot snapshot) {
+    if (snapshot?.documents != null) {
+      String mostPopularColor;
+      // Find the highest scoring Color currently.
+      snapshot.documents.fold<int>(-1, (int curValue, DocumentSnapshot d) {
+        String color = d.documentID;
+        var votes = d['votes'] as num;
+        if (votes > curValue) {
+          curValue = votes;
+          mostPopularColor = color;
+        }
+      });
+      if (mostPopularColor != _currentColor) {
+        _currentColor = mostPopularColor;
+        bluetooth.sendMessage(colorCodeMap[_currentColor]);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,51 +126,54 @@ class _LightControlState extends State<LightControl> {
       itemBuilder: (_, __) => Icon(Icons.star),
     );
     var bluetooth = Provider.of<BluetoothState>(context);
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Turn on the lights!'),
-            Padding(
-              padding: const EdgeInsets.only(top: 50, bottom: 50),
-              child: Switch(
-                value: _on,
-                onChanged: (bool value) {
-                  setState(() => _on = value);
-                  // send the on/off signal: off: 0x4e
-                  if (_on) {
-                    bluetooth.sendMessage(offSignal);
-                  } else {
-                    bluetooth.sendMessage(yellowColor);
-                  }
-                },
-                activeColor: Colors.orange,
-              ),
-            ),
-          ],
-        ),
-        RaisedButton(
-          color: Colors.yellow,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    return Consumer<QuerySnapshot>(builder: (context, snapshot, _) {
+      updateMostPopularColor(bluetooth, snapshot);
+      return Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              sparkleStar,
-              Text('Make it sparkle'),
-              sparkleStar,
+              Text('Turn on the lights!'),
+              Padding(
+                padding: const EdgeInsets.only(top: 50, bottom: 50),
+                child: Switch(
+                  value: _on,
+                  onChanged: (bool value) {
+                    setState(() => _on = value);
+                    // send the on/off signal: off: 0x4e
+                    if (_on) {
+                      bluetooth.sendMessage(offSignal);
+                    } else {
+                      bluetooth.sendMessage(lightSpill);
+                    }
+                  },
+                  activeColor: Colors.orange,
+                ),
+              ),
             ],
           ),
-          onPressed: () => bluetooth.sendMessage(sparkle),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RainbowButton(
-            text: 'Rainbow',
-            onPressed: () => bluetooth.sendMessage(rainbow),
+          RaisedButton(
+            color: Colors.yellow,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                sparkleStar,
+                Text('Make it sparkle'),
+                sparkleStar,
+              ],
+            ),
+            onPressed: () => bluetooth.sendMessage(sparkle),
           ),
-        )
-      ],
-    );
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RainbowButton(
+              text: 'Rainbow',
+              onPressed: () => bluetooth.sendMessage(rainbow),
+            ),
+          )
+        ],
+      );
+    });
   }
 }
 
