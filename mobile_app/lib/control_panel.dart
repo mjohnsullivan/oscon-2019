@@ -97,7 +97,7 @@ class _LightControlState extends State<LightControl> {
   };
   final int lightSpill = AsciiCodec().encode('l')[0];
   final int sparkle = AsciiCodec().encode('s')[0];
-  final int rainbow = AsciiCodec().encode('w')[0];
+  final int rainbow = AsciiCodec().encode('o')[0];
   String _currentColor = 'blue';
 
   void updateMostPopularColor(

@@ -15,16 +15,20 @@
 
 #include <Adafruit_NeoPixel.h>
 
-// Communication protocol:
+// Communication "protocol":
 // 'r' = red
 // 'b' = blue
 // 'y' = yellow
 // 'g' = green
+// 'w' = white
 // 's' = sparkles
-// 'w' = rainbow
+// 'm' = march, a set of (currently 10) pixels march down the strip.
+// 'o' = rainbow
+//  'l' = light spill, that is, spill down the pixel strip and stay on with a given color.
 // Any other character sets all pixels to off.
-// TODO(efortuna): start with rainbow on.
-uint8_t currentMode = 'b';
+uint8_t currentMode = 'l';
+uint32_t currentColor = 0;
+uint8_t receivedInput = 'o';
 
 // The board pins that are connected to Neopixel strips.
 static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
@@ -187,17 +191,12 @@ void rainbow() {
   }
 }
 
-void pixelLine(int color) {
-  strip.clear();
-  // Show a chosen color on 10 pixels. This 10-pixel segment
-  // moves across the strip, using an offset.
-  // The Adafruit_NeoPixel library is forgiving: when this
-  // offset causes some of the pixels to move off the end of the
-  // strip, we don't get a range error. Yay.
-  for (uint16_t i = 0; i < 10; i++) {
+void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
+  if (clearStrip) strip.clear();
+  for (uint16_t i = 0; i < numLeds; i++) {
     strip.setPixelColor(i + offset, color);
   }
-  delay(150);
+  delay(delayTime);
 }
 
 void sparkle(int color) {
@@ -215,8 +214,10 @@ void drawPixels() {
   Serial.println("");
   Serial.print("Current mode: ");
   Serial.println(currentMode);
+  Serial.print("Current color (if applicable): ");
+  Serial.println(currentColor);
 
-  switch (currentMode) {
+  switch (receivedInput) {
     case 'w':
       rainbow();
     default: 
@@ -247,7 +248,7 @@ void pollBluetooth() {
 
     Serial.print((char)command);
 
-    currentMode = command;
+    receivedInput = command;
 
     // Hex output too, helps w/debugging!
     Serial.print(" [0x");
@@ -259,33 +260,26 @@ void pollBluetooth() {
 
 void updatePixels() {
   
-  uint32_t aCol = strip.Color(0, 0, 0, 0);  
-
-  // When change colors/animations based on a single character
-  // coming over Bluetooth LE UART from the mobile device.
-  // red: 'r', yellow: 'y', green: 'g', and blue: 'b'
-  //
-  // We also have a special sparkly white pattern: 's'.
-  //
-  // Any other character sets all pixels to off.
-  switch (currentMode) {
+  switch (receivedInput) {
     case 'r':
       Serial.println("red");
-      aCol = strip.Color(0, 128, 0, 0);
+      currentColor = strip.Color(0, 128, 0, 0);
       break;
     case 'y':
-      aCol = strip.Color(128, 128, 0, 0);
+      currentColor = strip.Color(128, 128, 0, 0);
       break;
     case 'g':
-      aCol = strip.Color(128, 0, 0, 0);
+      currentColor = strip.Color(128, 0, 0, 0);
       break;
     case 'b':
-      aCol = strip.Color(0, 0, 128, 0);
+      currentColor = strip.Color(0, 0, 128, 0);
+      break;
+    case 'w':
+      currentColor = strip.Color(255, 255, 255, 255);
       break;
     default:
-      Serial.println("default");
-      aCol = strip.Color(0, 0, 0, 0);
-      break;
+      // assume everything else is a "mode" signifier.
+      currentMode = receivedInput;
   }
 
   if (currentMode == 's') {
@@ -294,14 +288,22 @@ void updatePixels() {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
-      sparkle(strip.Color(255, 255, 255, 255));
+      sparkle(currentColor);
       strip.show();
     }
-  } else {
+  } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
-      pixelLine(aCol);
+      pixelLine(currentColor, 1, false, 50);
+      strip.show();
+    }
+    offset = (offset + 1) % (STRIPLEN);
+  } else if (currentMode == 'm') {
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+      pixelLine(currentColor, 10, true, 150);
       strip.show();
     }
     // Add one to the offset, and set it back to 0 when
@@ -314,10 +316,5 @@ void updatePixels() {
 void loop(void)
 {
   pollBluetooth();
-  // it's too slow to do all simultaneously. so  fill it up, and then pick a random one to do the effect to. then fill it up again.
-  // or have all off and do effect to.
-  //TODO
-  //pixelLine(strip.Color(0, 0, 128, 0));
-  //strip.show();
   drawPixels();
 }
