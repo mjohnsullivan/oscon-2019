@@ -47,6 +47,10 @@ class _VotesProviderState extends State<VotesProvider> {
   fs.Firestore store;
   final _messagesController = StreamController<String>();
   final _votesSink = StreamController<String>();
+  final _yellowVotesController = StreamController<int>();
+  final _blueVotesController = StreamController<int>();
+  final _redVotesController = StreamController<int>();
+  final _greenVotesController = StreamController<int>();
 
   @override
   void initState() {
@@ -71,31 +75,51 @@ class _VotesProviderState extends State<VotesProvider> {
         switch (change.type) {
           case 'added':
           case 'modified':
-            _documentAdded(change);
+            _documentUpdated(change);
             break;
         }
       });
     });
 
     // Initialize sink listeners
-    _votesSink.stream.listen((color) => _voteCast(color));
+    _votesSink.stream.listen((color) => _castVote(color));
   }
 
   @override
   void dispose() {
     app?.delete();
     _messagesController?.close();
+    _votesSink?.close();
+    _yellowVotesController?.close();
+    _blueVotesController?.close();
+    _greenVotesController?.close();
+    _redVotesController?.close();
     super.dispose();
   }
 
-  void _documentAdded(fs.DocumentChange change) {
+  void _documentUpdated(fs.DocumentChange change) {
     final data = change.doc.data();
     final color = change.doc.id;
-    final votes = data['votes'] as num;
-    _messagesController.add('$votes for $color');
+    if (colorMap.containsKey(color)) {
+      final votes = data['votes'] as num;
+      switch (color) {
+        case 'yellow':
+          _yellowVotesController.add(votes);
+          break;
+        case 'green':
+          _greenVotesController.add(votes);
+          break;
+        case 'blue':
+          _blueVotesController.add(votes);
+          break;
+        case 'red':
+          _redVotesController.add(votes);
+      }
+      _messagesController.add('$votes for $color');
+    }
   }
 
-  void _voteCast(String color) {
+  void _castVote(String color) {
     final ref = store.doc('votes/$color');
     ref.get().then((snapshot) {
       if (snapshot.exists) {
@@ -112,6 +136,10 @@ class _VotesProviderState extends State<VotesProvider> {
   Widget build(BuildContext context) => VotesConsumer(
         messages: _messagesController.stream,
         castVote: _votesSink,
+        yellowVotes: _yellowVotesController.stream,
+        greenVotes: _greenVotesController.stream,
+        blueVotes: _blueVotesController.stream,
+        redVotes: _redVotesController.stream,
         child: widget.child,
       );
 }
@@ -121,25 +149,44 @@ class VotesConsumer extends InheritedWidget {
   VotesConsumer({
     @required this.messages,
     @required this.castVote,
+    @required this.yellowVotes,
+    @required this.greenVotes,
+    @required this.blueVotes,
+    @required this.redVotes,
     @required Widget child,
   })  : assert(messages != null),
         assert(castVote != null),
+        assert(yellowVotes != null),
         assert(child != null),
         super(child: child);
 
   final Stream<String> messages;
   final Sink<String> castVote;
+  final Stream<int> yellowVotes;
+  final Stream<int> greenVotes;
+  final Stream<int> blueVotes;
+  final Stream<int> redVotes;
 
   static VotesConsumer of(BuildContext context) =>
       (context.inheritFromWidgetOfExactType(VotesConsumer) as VotesConsumer);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => oldWidget != this;
+
+  Stream<int> voteStreamFromColor(String color) {
+    switch (color) {
+      case 'yellow':
+        return yellowVotes;
+      case 'green':
+        return greenVotes;
+      case 'red':
+        return redVotes;
+    }
+    return blueVotes;
+  }
 }
 
-void main() {
-  runApp(VotingApp());
-}
+void main() => runApp(VotingApp());
 
 class VotingApp extends StatelessWidget {
   @override
@@ -186,11 +233,9 @@ class DatabaseMessage extends StatelessWidget {
     final messages = VotesConsumer.of(context).messages;
     return StreamBuilder<String>(
         stream: messages,
-        initialData: 'Got no messages',
+        initialData: 'No messages',
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Text(snapshot.data);
-          }
+          if (snapshot.hasData) return Text(snapshot.data);
         });
   }
 }
@@ -238,9 +283,17 @@ class VotingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-        color: colorMap[label],
-        child: Text(label, style: buttonTextStyle),
-        onPressed: () => VotesConsumer.of(context).castVote.add(label));
+    return StreamBuilder<int>(
+        stream: VotesConsumer.of(context).voteStreamFromColor(label),
+        initialData: 0,
+        builder: (context, snapshot) {
+          if (snapshot.hasData)
+            return FlatButton(
+                color: colorMap[label],
+                child: Text('${snapshot.data}', style: buttonTextStyle),
+                onPressed: () => VotesConsumer.of(context).castVote.add(label));
+          else
+            return Center(child: CircularProgressIndicator());
+        });
   }
 }
