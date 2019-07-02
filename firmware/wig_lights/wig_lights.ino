@@ -191,6 +191,48 @@ void rainbow() {
   }
 }
 
+void meteorRain(byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int speedDelay) {  
+  strip.clear();
+  
+  for(int i = 0; i < STRIPLEN+STRIPLEN; i++) {
+    
+    // fade brightness all LEDs one step
+    for(int j=0; j<STRIPLEN; j++) {
+      if( (!meteorRandomDecay) || (random(10)>5) ) {
+        fadeToBlack(j, meteorTrailDecay );        
+      }
+    }
+    
+    // draw meteor
+    for(int j = 0; j < meteorSize; j++) {
+      if( ( i-j <STRIPLEN) && (i-j>=0) ) {
+        strip.setPixelColor(i-j, currentColor);
+      } 
+    }
+   
+    strip.show();
+    delay(speedDelay);
+  }
+}
+
+// used by meteorrain
+void fadeToBlack(int neoPixelIndex, byte fadeValue) {
+    uint32_t oldColor;
+    uint8_t r, g, b;
+    int value;
+    
+    oldColor = strip.getPixelColor(neoPixelIndex);
+    r = (oldColor & 0x00ff0000UL) >> 16;
+    g = (oldColor & 0x0000ff00UL) >> 8;
+    b = (oldColor & 0x000000ffUL);
+
+    r=(r<=10)? 0 : (int) r-(r*fadeValue/256);
+    g=(g<=10)? 0 : (int) g-(g*fadeValue/256);
+    b=(b<=10)? 0 : (int) b-(b*fadeValue/256);
+    
+    strip.setPixelColor(neoPixelIndex, r,g,b, w); 
+}
+
 void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
   if (clearStrip) strip.clear();
   for (uint16_t i = 0; i < numLeds; i++) {
