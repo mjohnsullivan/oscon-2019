@@ -21,9 +21,10 @@ const buttonTextStyle = TextStyle(
 );
 
 const labelTextStyle = TextStyle(
-  fontFamily: 'RobotoMono',
+  fontFamily: 'Raleway',
+  fontWeight: FontWeight.w900,
   color: Colors.black,
-  fontSize: 16,
+  fontSize: 32,
 );
 
 final colorMap = {
@@ -51,6 +52,7 @@ class _VotesProviderState extends State<VotesProvider> {
   final _blueVotesController = StreamController<int>();
   final _redVotesController = StreamController<int>();
   final _greenVotesController = StreamController<int>();
+  final _prettyController = StreamController<bool>();
 
   @override
   void initState() {
@@ -72,12 +74,8 @@ class _VotesProviderState extends State<VotesProvider> {
     final ref = store.collection('votes');
     ref.onSnapshot.listen((querySnapshot) {
       querySnapshot.docChanges().forEach((change) {
-        switch (change.type) {
-          case 'added':
-          case 'modified':
-            _documentUpdated(change);
-            break;
-        }
+        if (['added', 'modified'].contains(change.type))
+          _documentUpdated(change);
       });
     });
 
@@ -94,6 +92,7 @@ class _VotesProviderState extends State<VotesProvider> {
     _blueVotesController?.close();
     _greenVotesController?.close();
     _redVotesController?.close();
+    _prettyController?.close();
     super.dispose();
   }
 
@@ -116,6 +115,8 @@ class _VotesProviderState extends State<VotesProvider> {
           _redVotesController.add(votes);
       }
       _messagesController.add('$votes for $color');
+    } else if (change.doc.id == 'web_app_settings') {
+      _prettyController.add(data['purdy']);
     }
   }
 
@@ -140,6 +141,7 @@ class _VotesProviderState extends State<VotesProvider> {
         greenVotes: _greenVotesController.stream,
         blueVotes: _blueVotesController.stream,
         redVotes: _redVotesController.stream,
+        pretty: _prettyController.stream,
         child: widget.child,
       );
 }
@@ -153,6 +155,7 @@ class VotesConsumer extends InheritedWidget {
     @required this.greenVotes,
     @required this.blueVotes,
     @required this.redVotes,
+    @required this.pretty,
     @required Widget child,
   })  : assert(messages != null),
         assert(castVote != null),
@@ -166,6 +169,7 @@ class VotesConsumer extends InheritedWidget {
   final Stream<int> greenVotes;
   final Stream<int> blueVotes;
   final Stream<int> redVotes;
+  final Stream<bool> pretty;
 
   static VotesConsumer of(BuildContext context) =>
       (context.inheritFromWidgetOfExactType(VotesConsumer) as VotesConsumer);
@@ -196,31 +200,55 @@ class VotingApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: VotingPage(),
+      home: VotesProvider(
+        child: Scaffold(
+          body: DefaultTextStyle(
+            style: defaultTextStyle,
+            child: VotingPageSelector(),
+          ),
+        ),
+      ),
     );
   }
 }
 
 /// Main page for the voting app
-class VotingPage extends StatelessWidget {
+class VotingPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return VotesProvider(
-      child: Scaffold(
-        body: DefaultTextStyle(
-          style: defaultTextStyle,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  VotingTile(),
-                  DatabaseMessage(),
-                ],
-              ),
-            ),
-          ),
+    return StreamBuilder<bool>(
+        stream: VotesConsumer.of(context).pretty,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return snapshot.data ? PurdyVotingPage() : SimpleVotingPage();
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        });
+  }
+}
+
+class PurdyVotingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('I\'m so purdy!!!!!'),
+    );
+  }
+}
+
+class SimpleVotingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            VotingTile(),
+            DatabaseMessage(),
+          ],
         ),
       ),
     );
