@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter_web/material.dart';
-import 'package:firebase/firebase.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase/firestore.dart' as fs;
+import 'package:provider/provider.dart';
 
 const defaultTextStyle = TextStyle(
   fontFamily: 'RobotoMono',
@@ -34,94 +33,83 @@ final colorMap = {
   'red': Colors.red
 };
 
-/// Stateful widget to manage voting state
-class VotesProvider extends StatefulWidget {
-  VotesProvider({this.child});
-  final Widget child;
-
-  @override
-  _VotesProviderState createState() => _VotesProviderState();
-}
-
-class _VotesProviderState extends State<VotesProvider> {
-  App app;
+/// Manages streams
+class FirebaseInstance {
+  FirebaseInstance() {
+    _initializeFirebase();
+  }
+  fb.App app;
   fs.Firestore store;
-  final _messagesController = StreamController<String>();
-  final _votesSink = StreamController<String>();
-  final _yellowVotesController = StreamController<int>();
-  final _blueVotesController = StreamController<int>();
-  final _redVotesController = StreamController<int>();
-  final _greenVotesController = StreamController<int>();
-  final _prettyController = StreamController<bool>();
 
-  @override
-  void initState() {
-    super.initState();
+  final pretty = ValueNotifier<bool>(false);
+  final blueNotifier = ValueNotifier<int>(0);
+  final greenNotifier = ValueNotifier<int>(0);
+  final redNotifier = ValueNotifier<int>(0);
+  final yellowNotifier = ValueNotifier<int>(0);
+
+  void _initializeFirebase() {
     // Hack to ensure two apps are not created at the same time
     final appName = DateTime.now().toString();
-    app = initializeApp(
+    app = fb.initializeApp(
       name: appName,
-      apiKey: "AIzaSyAG7wN-Zv4VgD6aSUP7N9xthvkZ6QKg3Rs",
-      authDomain: "oscon-voter.firebaseapp.com",
-      databaseURL: "https://oscon-voter.firebaseio.com",
-      projectId: "oscon-voter",
-      storageBucket: "",
-      messagingSenderId: "150136682850",
-      // appId: "1:150136682850:web:d14f3a68ab2b79f0",
+      apiKey: 'AIzaSyAG7wN-Zv4VgD6aSUP7N9xthvkZ6QKg3Rs',
+      authDomain: 'oscon-voter.firebaseapp.com',
+      databaseURL: 'https://oscon-voter.firebaseio.com',
+      projectId: 'oscon-voter',
+      storageBucket: '',
+      messagingSenderId: '150136682850',
+      // appId: '1:150136682850:web:d14f3a68ab2b79f0',
     );
 
-    store = firestore(app);
-    final ref = store.collection('votes');
-    ref.onSnapshot.listen((querySnapshot) {
+    store = fb.firestore(app);
+
+    // Set up settings listener
+    final settingsCollection = store.collection('settings');
+    settingsCollection.onSnapshot.listen((querySnapshot) {
       querySnapshot.docChanges().forEach((change) {
         if (['added', 'modified'].contains(change.type))
-          _documentUpdated(change);
+          _settingsChanged(change);
       });
     });
 
-    // Initialize sink listeners
-    _votesSink.stream.listen((color) => _castVote(color));
+    // Set up colour changes
+    final ref = store.collection('votes');
+    ref.onSnapshot.listen((querySnapshot) {
+      querySnapshot.docChanges().forEach((change) {
+        if (['added', 'modified'].contains(change.type)) _colourVote(change);
+      });
+    });
   }
 
-  @override
-  void dispose() {
-    app?.delete();
-    _messagesController?.close();
-    _votesSink?.close();
-    _yellowVotesController?.close();
-    _blueVotesController?.close();
-    _greenVotesController?.close();
-    _redVotesController?.close();
-    _prettyController?.close();
-    super.dispose();
-  }
-
-  void _documentUpdated(fs.DocumentChange change) {
-    final data = change.doc.data();
-    final color = change.doc.id;
-    if (colorMap.containsKey(color)) {
-      final votes = data['votes'] as num;
-      switch (color) {
-        case 'yellow':
-          _yellowVotesController.add(votes);
-          break;
-        case 'green':
-          _greenVotesController.add(votes);
-          break;
-        case 'blue':
-          _blueVotesController.add(votes);
-          break;
-        case 'red':
-          _redVotesController.add(votes);
-      }
-      _messagesController.add('$votes for $color');
-    } else if (change.doc.id == 'web_app_settings') {
-      _prettyController.add(data['purdy']);
+  _settingsChanged(fs.DocumentChange change) {
+    if (change.doc.id == 'web_app_settings') {
+      print('Purdy is ${change.doc.data()['purdy']}');
+      pretty.value = change.doc.data()['purdy'];
     }
   }
 
-  void _castVote(String color) {
-    final ref = store.doc('votes/$color');
+  void _colourVote(fs.DocumentChange change) {
+    final data = change.doc.data();
+    final color = change.doc.id;
+    final votes = data['votes'] as num;
+    colourNotifier(color).value = votes;
+  }
+
+  ValueNotifier<int> colourNotifier(String colour) {
+    switch (colour) {
+      case 'yellow':
+        return yellowNotifier;
+      case 'green':
+        return greenNotifier;
+      case 'blue':
+        return blueNotifier;
+      default:
+        return redNotifier;
+    }
+  }
+
+  void castVote(String colour) {
+    final ref = store.doc('votes/$colour');
     ref.get().then((snapshot) {
       if (snapshot.exists) {
         final data = snapshot.data();
@@ -132,78 +120,29 @@ class _VotesProviderState extends State<VotesProvider> {
       }
     });
   }
-
-  @override
-  Widget build(BuildContext context) => VotesConsumer(
-        messages: _messagesController.stream,
-        castVote: _votesSink,
-        yellowVotes: _yellowVotesController.stream,
-        greenVotes: _greenVotesController.stream,
-        blueVotes: _blueVotesController.stream,
-        redVotes: _redVotesController.stream,
-        pretty: _prettyController.stream,
-        child: widget.child,
-      );
 }
 
-/// Inherited widget to make state available throughout the app
-class VotesConsumer extends InheritedWidget {
-  VotesConsumer({
-    @required this.messages,
-    @required this.castVote,
-    @required this.yellowVotes,
-    @required this.greenVotes,
-    @required this.blueVotes,
-    @required this.redVotes,
-    @required this.pretty,
-    @required Widget child,
-  })  : assert(messages != null),
-        assert(castVote != null),
-        assert(yellowVotes != null),
-        assert(child != null),
-        super(child: child);
-
-  final Stream<String> messages;
-  final Sink<String> castVote;
-  final Stream<int> yellowVotes;
-  final Stream<int> greenVotes;
-  final Stream<int> blueVotes;
-  final Stream<int> redVotes;
-  final Stream<bool> pretty;
-
-  static VotesConsumer of(BuildContext context) =>
-      (context.inheritFromWidgetOfExactType(VotesConsumer) as VotesConsumer);
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => oldWidget != this;
-
-  Stream<int> voteStreamFromColor(String color) {
-    switch (color) {
-      case 'yellow':
-        return yellowVotes;
-      case 'green':
-        return greenVotes;
-      case 'red':
-        return redVotes;
-    }
-    return blueVotes;
-  }
-}
-
-void main() => runApp(VotingApp());
+void main() => runApp(
+      Provider<FirebaseInstance>.value(
+        value: FirebaseInstance(),
+        child: VotingApp(),
+      ),
+    );
 
 class VotingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final firebase = Provider.of<FirebaseInstance>(context);
     return MaterialApp(
       title: 'OSCON Voter!',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: VotesProvider(
-        child: Scaffold(
-          body: DefaultTextStyle(
-            style: defaultTextStyle,
+      home: Scaffold(
+        body: DefaultTextStyle(
+          style: defaultTextStyle,
+          child: ChangeNotifierProvider<ValueNotifier<bool>>.value(
+            value: firebase.pretty,
             child: VotingPageSelector(),
           ),
         ),
@@ -216,15 +155,10 @@ class VotingApp extends StatelessWidget {
 class VotingPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-        stream: VotesConsumer.of(context).pretty,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return snapshot.data ? PurdyVotingPage() : SimpleVotingPage();
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        });
+    return Consumer<ValueNotifier<bool>>(
+      builder: (context, snapshot, _) =>
+          snapshot.value ? PurdyVotingPage() : SimpleVotingPage(),
+    );
   }
 }
 
@@ -247,24 +181,10 @@ class SimpleVotingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             VotingTile(),
-            DatabaseMessage(),
           ],
         ),
       ),
     );
-  }
-}
-
-class DatabaseMessage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final messages = VotesConsumer.of(context).messages;
-    return StreamBuilder<String>(
-        stream: messages,
-        initialData: 'No messages',
-        builder: (context, snapshot) {
-          if (snapshot.hasData) return Text(snapshot.data);
-        });
   }
 }
 
@@ -311,17 +231,16 @@ class VotingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<int>(
-        stream: VotesConsumer.of(context).voteStreamFromColor(label),
-        initialData: 0,
-        builder: (context, snapshot) {
-          if (snapshot.hasData)
-            return FlatButton(
-                color: colorMap[label],
-                child: Text('${snapshot.data}', style: buttonTextStyle),
-                onPressed: () => VotesConsumer.of(context).castVote.add(label));
-          else
-            return Center(child: CircularProgressIndicator());
-        });
+    final firebase = Provider.of<FirebaseInstance>(context);
+    return ChangeNotifierProvider.value(
+      value: firebase.colourNotifier(label),
+      child: Consumer<ValueNotifier<int>>(builder: (context, notifier, _) {
+        return FlatButton(
+          color: colorMap[label],
+          child: Text('${notifier.value}', style: buttonTextStyle),
+          onPressed: () => firebase.castVote(label),
+        );
+      }),
+    );
   }
 }
