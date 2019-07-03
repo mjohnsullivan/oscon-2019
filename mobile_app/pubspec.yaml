@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   cloud_firestore: ^0.12.5
   provider: ^3.0.0
+  fireworks: ^0.9.0
   flutter_blue:
     git: 
       url: https://github.com/efortuna/flutter_blue
@@ -30,7 +31,7 @@ flutter:
   assets:
     - assets/diagonal_rainbow_gradient.jpg
     - assets/diagonal_rainbow_gradient2.jpg
-    - assets/rainbow_gradient.png
+    - assets/snow_sparkle.jpg
   fonts:
     - family: MountainsOfChristmas
       fonts:

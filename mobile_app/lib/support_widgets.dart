@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:fireworks/fireworks.dart';
 
 class RainbowButton extends StatelessWidget {
   RainbowButton({this.onPressed, this.text});
@@ -22,6 +24,49 @@ class RainbowButton extends StatelessWidget {
                   color: Colors.grey[800],
                   fontWeight: FontWeight.bold,
                   fontSize: 30)),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              onLongPress: onPressed,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SparkleButton extends StatelessWidget {
+  SparkleButton({this.onPressed, this.text});
+
+  final VoidCallback onPressed;
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    var sparkleStar = SpinKitPulse(
+      itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
+    );
+    return Card(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: <Widget>[
+          Opacity(
+              opacity: .7,
+              child: Image.asset('assets/snow_sparkle.jpg',
+                  fit: BoxFit.fill, height: 400)),
+          Text(text,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30)),
+          Fireworks(
+            numberOfExplosions: 8,
+            child: sparkleStar,
+            maxHeight: 200,
+            maxWidth: 200,
+          ),
           Material(
             color: Colors.transparent,
             child: InkWell(

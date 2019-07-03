@@ -134,9 +134,6 @@ class _LightControlState extends State<LightControl> {
 
   @override
   Widget build(BuildContext context) {
-    var sparkleStar = SpinKitPulse(
-      itemBuilder: (_, __) => Icon(Icons.star),
-    );
     var twinkleAnimation = SpinKitFadingFour(
       itemBuilder: (_, __) => Icon(FontAwesomeIcons.solidCircle, size: 10),
     );
@@ -182,16 +179,8 @@ class _LightControlState extends State<LightControl> {
                 ],
               ),
             ),
-            RaisedButton(
-              color: Colors.yellow,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  sparkleStar,
-                  Text('Make it sparkle'),
-                  sparkleStar,
-                ],
-              ),
+            SparkleButton(
+              text: 'Sparkle',
               onPressed: () => bluetooth?.sendMessage(sparkle),
             ),
             RainbowButton(
