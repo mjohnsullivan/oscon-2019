@@ -15,6 +15,11 @@
 
 #include <Adafruit_NeoPixel.h>
 
+// ones to choose random strip for:
+// sparkles
+// color spill
+// bouncing balls
+
 // Communication "protocol":
 // 'r' = red
 // 'b' = blue
@@ -26,6 +31,7 @@
 // 'm' = march, a set of (currently 10) pixels march down the strip.
 // 'e' = meteor rain
 // 'f' = fire
+// 'a' = bouncing balls
 // 'o' = rainbow
 //  'l' = light spill, that is, spill down the pixel strip and stay on with a given color.
 // Any other character sets all pixels to off.
@@ -366,13 +372,67 @@ void twinkle(int count, int speedDelay) {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) { ///
       int pinNum = PIN_NUMBERS[pin_index]; ///
       strip.setPin(pinNum); ///
-      strip.setPixelColor(random(STRIPLEN), currentColo);
+      strip.setPixelColor(random(STRIPLEN), currentColor);
       strip.show();
     }
      delay(speedDelay);
    }
   
   delay(speedDelay);
+}
+
+void bouncingBalls(int ballCount) {
+  float Gravity = -9.81;
+  int StartHeight = 1;
+  
+  float Height[ballCount];
+  float ImpactVelocityStart = sqrt( -2 * Gravity * StartHeight );
+  float ImpactVelocity[ballCount];
+  float TimeSinceLastBounce[ballCount];
+  int   Position[ballCount];
+  long  ClockTimeSinceLastBounce[ballCount];
+  float Dampening[ballCount];
+  boolean ballBouncing[ballCount];
+  boolean ballsStillBouncing = true;
+  
+  for (int i = 0 ; i < ballCount ; i++) {   
+    ClockTimeSinceLastBounce[i] = millis();
+    Height[i] = StartHeight;
+    Position[i] = 0; 
+    ImpactVelocity[i] = ImpactVelocityStart;
+    TimeSinceLastBounce[i] = 0;
+    Dampening[i] = 0.90 - float(i)/pow(ballCount,2);
+    ballBouncing[i]=true; 
+  }
+
+  while (ballsStillBouncing) {
+    for (int i = 0 ; i < ballCount ; i++) {
+      TimeSinceLastBounce[i] =  millis() - ClockTimeSinceLastBounce[i];
+      Height[i] = 0.5 * Gravity * pow( TimeSinceLastBounce[i]/1000 , 2.0 ) + ImpactVelocity[i] * TimeSinceLastBounce[i]/1000;
+  
+      if ( Height[i] < 0 ) {                      
+        Height[i] = 0;
+        ImpactVelocity[i] = Dampening[i] * ImpactVelocity[i];
+        ClockTimeSinceLastBounce[i] = millis();
+  
+        if ( ImpactVelocity[i] < 0.01 ) {
+          ballBouncing[i]=false;
+        }
+      }
+      Position[i] = round( Height[i] * (STRIPLEN - 1) / StartHeight);
+    }
+
+    ballsStillBouncing = false; // assume no balls bouncing
+    for (int i = 0 ; i < ballCount ; i++) {
+      strip.setPixelColor(Position[i], currentColor);
+      if ( ballBouncing[i] ) {
+        ballsStillBouncing = true;
+      }
+    }
+    
+    strip.show();
+    strip.clear();
+  }
 }
 
 void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
@@ -484,6 +544,8 @@ void updatePixels() {
   } else if (currentMode = 't') {
     // Twinkle - Color (red, green, blue), count, speed delay, only one twinkle (true/false) 
     twinkle(10, 100);
+  } else if (currentMode = 'a') {
+    bouncingBalls(3);
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
