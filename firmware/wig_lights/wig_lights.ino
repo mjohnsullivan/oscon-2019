@@ -30,7 +30,7 @@
 // 'n' = running lights
 // 'e' = meteor rain
 // 't' = breathe
-// 'f' = fire
+// 'f' = fire     (https://github.com/i-protoss/wave)??
 // 'a' = bouncing balls
 // 'o' = rainbow
 //  'l' = light spill, that is, spill down the pixel strip and stay on with a given color.
