@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
@@ -100,6 +100,7 @@ class _LightControlState extends State<LightControl> {
   final int lightSpill = AsciiCodec().encode('l')[0];
   final int sparkle = AsciiCodec().encode('s')[0];
   final int rainbow = AsciiCodec().encode('o')[0];
+  final int twinkle = AsciiCodec().encode('t')[0];
   final int runningLights = AsciiCodec().encode('n')[0];
   String _currentColor = 'blue';
 
@@ -132,6 +133,9 @@ class _LightControlState extends State<LightControl> {
   Widget build(BuildContext context) {
     var sparkleStar = SpinKitPulse(
       itemBuilder: (_, __) => Icon(Icons.star),
+    );
+    var twinkleAnimation = SpinKitFadingFour(
+      itemBuilder: (_, __) => Icon(FontAwesomeIcons.solidCircle, size: 10),
     );
     // TODO(efortuna): re-enable.
     var bluetooth = null; //Provider.of<BluetoothState>(context);
@@ -187,6 +191,18 @@ class _LightControlState extends State<LightControl> {
               text: 'Running Lights',
               onPressed: () => bluetooth.sendMessage(runningLights),
             ),
+            RaisedButton(
+              color: Colors.yellow,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  twinkleAnimation,
+                  Text('Twinkle'),
+                  twinkleAnimation,
+                ],
+              ),
+              onPressed: () => bluetooth.sendMessage(twinkle),
+            )
           ],
         ));
   }
