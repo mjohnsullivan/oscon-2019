@@ -192,12 +192,14 @@ class _LightControlState extends State<LightControl> {
               onPressed: () => bluetooth.sendMessage(runningLights),
             ),
             RaisedButton(
-              color: Colors.yellow,
+              color: Colors.yellow[100],
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   twinkleAnimation,
-                  Text('Twinkle'),
+                  Text('Twinkle',
+                      style: TextStyle(
+                          fontSize: 30, fontFamily: 'MountainsOfChristmas')),
                   twinkleAnimation,
                 ],
               ),
