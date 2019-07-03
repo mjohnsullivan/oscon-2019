@@ -22,6 +22,7 @@
 // 'g' = green
 // 'w' = white
 // 's' = sparkles
+// 't' = twinkle
 // 'm' = march, a set of (currently 10) pixels march down the strip.
 // 'e' = meteor rain
 // 'f' = fire
@@ -226,11 +227,15 @@ void fire(int cooling, int sparking, int speedDelay) {
   }
 
   // Step 4.  Convert heat to LED colors
-  for( int j = 0; j < STRIPLEN; j++) {
-    setPixelHeatColor(j, heat[j] );
+  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+    int pinNum = PIN_NUMBERS[pin_index];
+    strip.setPin(pinNum);
+    for( int j = 0; j < STRIPLEN; j++) {
+      setPixelHeatColor(j, heat[j] );
+    }
+    strip.show();
   }
 
-  strip.show();
   delay(speedDelay);
 }
 
@@ -354,6 +359,22 @@ void fadeToBlack(int neoPixelIndex, byte fadeValue) {
     strip.setPixelColor(neoPixelIndex, r,g,b, 0); 
 }
 
+void twinkle(int count, int speedDelay) {
+  strip.clear();
+  
+  for (int i=0; i<count; i++) {
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) { ///
+      int pinNum = PIN_NUMBERS[pin_index]; ///
+      strip.setPin(pinNum); ///
+      strip.setPixelColor(random(STRIPLEN), currentColo);
+      strip.show();
+    }
+     delay(speedDelay);
+   }
+  
+  delay(speedDelay);
+}
+
 void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
   if (clearStrip) strip.clear();
   for (uint16_t i = 0; i < numLeds; i++) {
@@ -422,7 +443,7 @@ void pollBluetooth() {
 }
 
 void updatePixels() {
-  // TODO: might need to  clear strip if we are switching the mode.
+  // TODO: might need to  clear strip if we are switching the mode. and think about the switching process!
   
   switch (receivedInput) {
     case 'r':
@@ -460,6 +481,9 @@ void updatePixels() {
   } else if (currentMode = 'f') {
     // Fire - Cooling rate, Sparking rate, speed delay
     fire(55,120,15);
+  } else if (currentMode = 't') {
+    // Twinkle - Color (red, green, blue), count, speed delay, only one twinkle (true/false) 
+    twinkle(10, 100);
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
