@@ -126,7 +126,7 @@ class _LightControlState extends State<LightControl> {
       if (mostPopularColor != _currentColor) {
         _currentColor = mostPopularColor;
         if (widget.useBluetooth) {
-          bluetooth.sendMessage(colorCodeMap[_currentColor]);
+          bluetooth?.sendMessage(colorCodeMap[_currentColor]);
         }
       }
     }
@@ -142,34 +142,45 @@ class _LightControlState extends State<LightControl> {
     );
     var bluetooth =
         widget.useBluetooth ? Provider.of<BluetoothState>(context) : null;
+
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
           updateMostPopularColor(bluetooth, snapshot);
           return constColumn;
         },
-        child: Column(
+        child: GridView.count(
+          padding: const EdgeInsets.all(10),
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Turn on the lights!'),
-                Padding(
-                  padding: const EdgeInsets.only(top: 50, bottom: 50),
-                  child: Switch(
+            Card(
+              child: AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  color: Color(0xfffff980),
+                  child: Text('Let there be light!')),
+            ),
+            Container(
+              color: Colors.blue,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Let there be light!'),
+                  Switch(
                     value: _on,
                     onChanged: (bool value) {
                       setState(() => _on = value);
                       // send the on/off signal: off: 0x4e
                       if (_on) {
-                        bluetooth.sendMessage(offSignal);
+                        bluetooth?.sendMessage(offSignal);
                       } else {
-                        bluetooth.sendMessage(lightSpill);
+                        bluetooth?.sendMessage(lightSpill);
                       }
                     },
                     activeColor: Colors.orange,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             RaisedButton(
               color: Colors.yellow,
@@ -181,18 +192,15 @@ class _LightControlState extends State<LightControl> {
                   sparkleStar,
                 ],
               ),
-              onPressed: () => bluetooth.sendMessage(sparkle),
+              onPressed: () => bluetooth?.sendMessage(sparkle),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RainbowButton(
-                text: 'Rainbow',
-                onPressed: () => bluetooth.sendMessage(rainbow),
-              ),
+            RainbowButton(
+              text: 'Rainbow',
+              onPressed: () => bluetooth?.sendMessage(rainbow),
             ),
             ShimmerButton(
               text: 'Running Lights',
-              onPressed: () => bluetooth.sendMessage(runningLights),
+              onPressed: () => bluetooth?.sendMessage(runningLights),
             ),
             RaisedButton(
               color: Colors.yellow[100],
@@ -206,7 +214,7 @@ class _LightControlState extends State<LightControl> {
                   twinkleAnimation,
                 ],
               ),
-              onPressed: () => bluetooth.sendMessage(twinkle),
+              onPressed: () => bluetooth?.sendMessage(twinkle),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -222,7 +230,7 @@ class _LightControlState extends State<LightControl> {
                               TextStyle(fontSize: 30, fontFamily: 'SigmarOne')),
                     ],
                   ),
-                  onPressed: () => bluetooth.sendMessage(twinkle),
+                  onPressed: () => bluetooth?.sendMessage(twinkle),
                 )
               ],
             ),

@@ -30,6 +30,7 @@ flutter:
   assets:
     - assets/diagonal_rainbow_gradient.jpg
     - assets/diagonal_rainbow_gradient2.jpg
+    - assets/rainbow_gradient.png
   fonts:
     - family: MountainsOfChristmas
       fonts:
