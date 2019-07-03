@@ -17,7 +17,9 @@ class WearablesApp extends StatefulWidget {
 
 class _WearablesAppState extends State<WearablesApp> {
   int _selectedIndex = 0;
-  final _pages = [Votes(), LightControl()];
+  final _pages = [LightControl(useBluetooth: false), Votes()];
+  // FALLBACK STATE for technical difficulties:
+  //final _pages = [LightControl(useBluetooth: false), Votes()];
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +32,11 @@ class _WearablesAppState extends State<WearablesApp> {
           bottomNavigationBar: BottomNavigationBar(
             items: const [
               BottomNavigationBarItem(
+                  title: Text('Lights'),
+                  icon: Icon(MaterialCommunityIcons.lightbulb_on_outline)),
+              BottomNavigationBarItem(
                   title: Text('Votes'),
                   icon: Icon(awesome.FontAwesomeIcons.voteYea)),
-              BottomNavigationBarItem(
-                  title: Text('Lights'),
-                  icon: Icon(MaterialCommunityIcons.lightbulb_on_outline))
             ],
             onTap: (int index) => setState(() => _selectedIndex = index),
             currentIndex: _selectedIndex,

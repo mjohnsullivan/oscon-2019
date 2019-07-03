@@ -84,6 +84,8 @@ class FailedToConnect extends StatelessWidget {
 }
 
 class LightControl extends StatefulWidget {
+  LightControl({this.useBluetooth = true});
+  final useBluetooth;
   @override
   _LightControlState createState() => _LightControlState();
 }
@@ -123,8 +125,9 @@ class _LightControlState extends State<LightControl> {
       });
       if (mostPopularColor != _currentColor) {
         _currentColor = mostPopularColor;
-        // TODO(efortuna): re-enable.
-        //bluetooth.sendMessage(colorCodeMap[_currentColor]);
+        if (widget.useBluetooth) {
+          bluetooth.sendMessage(colorCodeMap[_currentColor]);
+        }
       }
     }
   }
@@ -137,8 +140,8 @@ class _LightControlState extends State<LightControl> {
     var twinkleAnimation = SpinKitFadingFour(
       itemBuilder: (_, __) => Icon(FontAwesomeIcons.solidCircle, size: 10),
     );
-    // TODO(efortuna): re-enable.
-    var bluetooth = null; //Provider.of<BluetoothState>(context);
+    var bluetooth =
+        widget.useBluetooth ? Provider.of<BluetoothState>(context) : null;
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
           updateMostPopularColor(bluetooth, snapshot);
