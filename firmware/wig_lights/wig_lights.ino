@@ -252,13 +252,12 @@ void breathe(int timeDelay) {
   for (int i = 0; i < 65535; i++) {
     // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
     float intensity = 255 /2.0 * (1.0 + sin(speedFactor * i));
-    strip.setBrightness(intensity);
-    // Now set every LED to that color
-    for (int ledNumber=0; ledNumber<STRIPLEN; ledNumber++) {
-      strip.setPixelColor(ledNumber, currentColo);
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+      strip.setBrightness(intensity);
+      strip.show();
     }
-  
-    strip.show();
     //Wait a bit before continuing to breathe
     delay(timeDelay);
   }
@@ -498,7 +497,7 @@ void runningLights(int timeDelay) {
       //float level = sin(i+cur_pos) * 127 + 128;
       //strip.setPixelColor((i,level,0,0, 0);
       //float level = sin(i+cur_pos) * 127 + 128;
-      strip.setPixelColor((i,((sin(i+cur_pos) * 127 + 128)/255)*r,
+      strip.setPixelColor(i,((sin(i+cur_pos) * 127 + 128)/255)*r,
                              ((sin(i+cur_pos) * 127 + 128)/255)*g,
                              ((sin(i+cur_pos) * 127 + 128)/255)*b, 0);
     }
@@ -618,6 +617,9 @@ void updatePixels() {
     bouncingBalls(3);
   } else if (currentMode == 'n') {
     runningLights(50);
+  } else if (currentMode == 't') {
+    if (colorUpdate) wholeStripColor();
+    breathe(10);
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
