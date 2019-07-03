@@ -126,53 +126,54 @@ class _LightControlState extends State<LightControl> {
       itemBuilder: (_, __) => Icon(Icons.star),
     );
     var bluetooth = Provider.of<BluetoothState>(context);
-    return Consumer<QuerySnapshot>(builder: (context, snapshot, _) {
-      updateMostPopularColor(bluetooth, snapshot);
-      return Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Turn on the lights!'),
-              Padding(
-                padding: const EdgeInsets.only(top: 50, bottom: 50),
-                child: Switch(
-                  value: _on,
-                  onChanged: (bool value) {
-                    setState(() => _on = value);
-                    // send the on/off signal: off: 0x4e
-                    if (_on) {
-                      bluetooth.sendMessage(offSignal);
-                    } else {
-                      bluetooth.sendMessage(lightSpill);
-                    }
-                  },
-                  activeColor: Colors.orange,
-                ),
+    var column = Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Turn on the lights!'),
+            Padding(
+              padding: const EdgeInsets.only(top: 50, bottom: 50),
+              child: Switch(
+                value: _on,
+                onChanged: (bool value) {
+                  setState(() => _on = value);
+                  // send the on/off signal: off: 0x4e
+                  if (_on) {
+                    bluetooth.sendMessage(offSignal);
+                  } else {
+                    bluetooth.sendMessage(lightSpill);
+                  }
+                },
+                activeColor: Colors.orange,
               ),
+            ),
+          ],
+        ),
+        RaisedButton(
+          color: Colors.yellow,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              sparkleStar,
+              Text('Make it sparkle'),
+              sparkleStar,
             ],
           ),
-          RaisedButton(
-            color: Colors.yellow,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                sparkleStar,
-                Text('Make it sparkle'),
-                sparkleStar,
-              ],
-            ),
-            onPressed: () => bluetooth.sendMessage(sparkle),
+          onPressed: () => bluetooth.sendMessage(sparkle),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: RainbowButton(
+            text: 'Rainbow',
+            onPressed: () => bluetooth.sendMessage(rainbow),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RainbowButton(
-              text: 'Rainbow',
-              onPressed: () => bluetooth.sendMessage(rainbow),
-            ),
-          )
-        ],
-      );
+        )
+      ],
+    );
+    return Consumer<QuerySnapshot>(builder: (context, snapshot, constColumn) {
+      updateMostPopularColor(bluetooth, snapshot);
+      return constColumn;
     });
   }
 }

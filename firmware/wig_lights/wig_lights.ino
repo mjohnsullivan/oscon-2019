@@ -16,8 +16,6 @@
 #include <Adafruit_NeoPixel.h>
 
 // ones to choose random strip for:
-// sparkles
-// color spill
 // bouncing balls
 
 // Communication "protocol":
@@ -29,6 +27,7 @@
 // 's' = sparkles
 // 't' = twinkle
 // 'm' = march, a set of (currently 10) pixels march down the strip.
+// 'n' = running lights
 // 'e' = meteor rain
 // 'f' = fire
 // 'a' = bouncing balls
@@ -443,14 +442,56 @@ void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
   delay(delayTime);
 }
 
-void sparkle(int color) {
-  strip.clear();
+void sparkle() {
+  // if colorUpdate is true, we need to set all the other strands we didn't set to the solid new color.
+  int selectedStrandIndexes[] = {random(NUM_PINS), random(NUM_PINS)};
+  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+    int pinNum = PIN_NUMBERS[pin_index];
+    strip.setPin(pinNum);
+    strip.clear();
 
-  strip.setPixelColor(random(STRIPLEN), color);
-  strip.setPixelColor(random(STRIPLEN), color);
-  strip.setPixelColor(random(STRIPLEN), color);
-  strip.setPixelColor(random(STRIPLEN), color);
-  delay(50);
+    if (pin_index == selectedStrandIndexes[0] || pin_index == selectedStrandIndexes[1]) {
+      strip.setPixelColor(random(STRIPLEN), currentColor);
+      strip.setPixelColor(random(STRIPLEN), currentColor);
+      strip.setPixelColor(random(STRIPLEN), currentColor);
+      strip.setPixelColor(random(STRIPLEN), currentColor);
+      delay(50);
+    } else {
+      wholeStripColor();
+    }
+    strip.show();
+  }
+}
+
+void runningLights(int timeDelay) {
+  int cur_pos=0;
+  uint8_t r, g, b, w;
+  r = (currentColor & RED_BITMASK) >> 16;
+  g = (currentColor & GREEN_BITMASK) >> 8;
+  b = (currentColor & BLUE_BITMASK);
+  
+  for(int i=0; i<STRIPLEN*2; i++)
+  {
+    cur_pos++; // = 0; //Position + Rate;
+    for(int i=0; i<STRIPLEN; i++) {
+      // sine wave, 3 offset waves make a rainbow!
+      //float level = sin(i+cur_pos) * 127 + 128;
+      //strip.setPixelColor((i,level,0,0, 0);
+      //float level = sin(i+cur_pos) * 127 + 128;
+      strip.setPixelColor((i,((sin(i+cur_pos) * 127 + 128)/255)*r,
+                             ((sin(i+cur_pos) * 127 + 128)/255)*g,
+                             ((sin(i+cur_pos) * 127 + 128)/255)*b, 0);
+    }
+    
+    strip.show();
+    delay(timeDelay);
+  }
+}
+
+void wholeStripColor() {
+  for( int i = 0; i < STRIPLEN; i++) {
+    strip.setPixelColor(i, currentColor);
+  }
 }
 
 void drawPixels() {
@@ -504,48 +545,59 @@ void pollBluetooth() {
 
 void updatePixels() {
   // TODO: might need to  clear strip if we are switching the mode. and think about the switching process!
-  
+
+  uint8_t newMode = 0;
+  uint32_t newColor = 0;
+  bool colorUpdate = false; // only used for some effects that are applied to a subset of strips.
   switch (receivedInput) {
     case 'r':
-      Serial.println("red");
-      currentColor = strip.Color(0, 128, 0, 0);
+      newColor = strip.Color(0, 255, 0, 0);
       break;
     case 'y':
-      currentColor = strip.Color(128, 128, 0, 0);
+      newColor = strip.Color(255, 255, 0, 0);
       break;
     case 'g':
-      currentColor = strip.Color(128, 0, 0, 0);
+      newColor = strip.Color(255, 0, 0, 0);
       break;
     case 'b':
-      currentColor = strip.Color(0, 0, 128, 0);
+      newColor = strip.Color(0, 0, 255, 0);
       break;
     case 'w':
-      currentColor = strip.Color(255, 255, 255, 255);
+      newColor = strip.Color(255, 255, 255, 255);
       break;
     default:
       // assume everything else is a "mode" signifier.
-      currentMode = receivedInput;
+      newMode = receivedInput;
   }
-
-  if (currentMode == 's') {
-    // for performance reasons (otherwise our little board can't keep up) 
-    // we do this loop in here, rather than at the highest level.
+  if (newMode != 0 && newMode != currentMode) {
+    currentMode = newMode;
+    // clear everything if changing modes.
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
-      sparkle(currentColor);
+      strip.clear();
       strip.show();
     }
-  } else if (currentMode = 'e') {
+  }
+  if (newColor != 0 && newColor != currentColor) {
+    currentColor = newColor;
+    colorUpdate = true;
+  }
+
+  if (currentMode == 's') {
+    sparkle();
+  } else if (currentMode == 'e') {
     meteorRain(10, 64, true, 30);
-  } else if (currentMode = 'f') {
+  } else if (currentMode == 'f') {
     // Fire - Cooling rate, Sparking rate, speed delay
     fire(55,120,15);
-  } else if (currentMode = 't') {
+  } else if (currentMode == 't') {
     // Twinkle - Color (red, green, blue), count, speed delay, only one twinkle (true/false) 
     twinkle(10, 100);
-  } else if (currentMode = 'a') {
+  } else if (currentMode == 'a') {
     bouncingBalls(3);
+  } else if (currentMode == 'n') {
+    runningLights();
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
@@ -555,10 +607,15 @@ void updatePixels() {
     }
     offset = (offset + 1) % (STRIPLEN);
   } else if (currentMode == 'm') {
+    int selectedStrandIndexes[] = {random(NUM_PINS), random(NUM_PINS)};
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
-      pixelLine(currentColor, 10, true, 150);
+      if (pin_index == selectedStrandIndexes[0] || pin_index == selectedStrandIndexes[1]) {
+        pixelLine(currentColor, 10, true, 150);
+      } else {
+        wholeStripColor();
+      }
       strip.show();
     }
     // Add one to the offset, and set it back to 0 when
