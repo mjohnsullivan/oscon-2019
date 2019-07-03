@@ -36,3 +36,7 @@ flutter:
         - asset: assets/fonts/Mountains_of_Christmas/MountainsofChristmas-Bold.ttf
         - asset: assets/fonts/Mountains_of_Christmas/MountainsofChristmas-Regular.ttf
           style: normal
+    - family: SigmarOne
+      fonts:
+        - asset: assets/fonts/Sigmar_One/SigmarOne-Regular.ttf
+          style: normal

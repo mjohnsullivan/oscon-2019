@@ -204,7 +204,25 @@ class _LightControlState extends State<LightControl> {
                 ],
               ),
               onPressed: () => bluetooth.sendMessage(twinkle),
-            )
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Meteor(size: Size(50, 70)),
+                RaisedButton(
+                  color: Colors.purple[200],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text('Meteor Fall',
+                          style:
+                              TextStyle(fontSize: 30, fontFamily: 'SigmarOne')),
+                    ],
+                  ),
+                  onPressed: () => bluetooth.sendMessage(twinkle),
+                )
+              ],
+            ),
           ],
         ));
   }
