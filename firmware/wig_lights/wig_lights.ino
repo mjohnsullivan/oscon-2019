@@ -29,6 +29,7 @@
 // 'm' = march, a set of (currently 10) pixels march down the strip.
 // 'n' = running lights
 // 'e' = meteor rain
+// 't' = breathe
 // 'f' = fire
 // 'a' = bouncing balls
 // 'o' = rainbow
@@ -242,6 +243,25 @@ void fire(int cooling, int sparking, int speedDelay) {
   }
 
   delay(speedDelay);
+}
+
+void breathe(int timeDelay) {
+  float speedFactor = 0.008; // I don't actually know what would look good
+  
+  // Make the lights breathe
+  for (int i = 0; i < 65535; i++) {
+    // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
+    float intensity = 255 /2.0 * (1.0 + sin(speedFactor * i));
+    strip.setBrightness(intensity);
+    // Now set every LED to that color
+    for (int ledNumber=0; ledNumber<STRIPLEN; ledNumber++) {
+      strip.setPixelColor(ledNumber, currentColo);
+    }
+  
+    strip.show();
+    //Wait a bit before continuing to breathe
+    delay(timeDelay);
+  }
 }
 
 void setPixelHeatColor (int pixelIndex, byte temperature) {
@@ -597,7 +617,7 @@ void updatePixels() {
   } else if (currentMode == 'a') {
     bouncingBalls(3);
   } else if (currentMode == 'n') {
-    runningLights();
+    runningLights(50);
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
