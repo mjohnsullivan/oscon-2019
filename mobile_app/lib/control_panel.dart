@@ -188,7 +188,6 @@ class _LightControlState extends State<LightControl> {
               text: 'Rainbow',
               onPressed: () => bluetooth?.sendMessage(rainbow),
             ),
-            // TODO
             ShimmerButton(
               text: 'Running Lights',
               onPressed: () => bluetooth?.sendMessage(runningLights),

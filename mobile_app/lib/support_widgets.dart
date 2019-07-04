@@ -89,20 +89,29 @@ class ShimmerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.grey,
+      clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onPressed,
         onLongPress: onPressed,
         // TODO: can we make this have a delay between the time.
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey[300],
-          highlightColor: Colors.yellow[100],
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
+        child: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.grey[600], Colors.grey[800]])),
+          child: Center(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300],
+              highlightColor: Colors.yellow[100],
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),
@@ -141,6 +150,7 @@ class MeteorButton extends StatelessWidget {
   }
 }
 
+// Code adjusted from https://github.com/nhancv/nc_flutter_util/
 class Meteor extends StatefulWidget {
   final Size size;
 
