@@ -61,8 +61,9 @@ class SparkleButton extends StatelessWidget {
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 30)),
-          Fireworks(
-            numberOfExplosions: 8,
+          //TODO(efortuna): fix import for this
+          Fireworks.only(
+            numberOfExplosions: 16,
             child: sparkleStar,
             maxHeight: 200,
             maxWidth: 200,
@@ -100,10 +101,40 @@ class ShimmerButton extends StatelessWidget {
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 40.0,
+              fontSize: 40,
               fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class MeteorButton extends StatelessWidget {
+  MeteorButton({this.onPressed, this.text});
+
+  final VoidCallback onPressed;
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      color: const Color(0xff8162f4),
+      child: Center(
+        child: Stack(
+          children: <Widget>[
+            Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 40,
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          ],
         ),
       ),
     );
@@ -210,16 +241,15 @@ class Particle {
     Random rd = Random();
 
     this.screenSize = screenSize;
-    this.speed =
-        Offset(-5 + rd.nextDouble() * 10, -15.0 + rd.nextDouble() * 10);
+    this.speed = Offset(5 + rd.nextDouble() * 10, -15.0 + rd.nextDouble() * 10);
     this.location =
         Offset(this.screenSize.width / 2, this.screenSize.height / 3 * 2);
-    this.radius = 10 + rd.nextDouble() * 20;
+    this.radius = 1 + rd.nextDouble() * 13;
     this.life = 20 + rd.nextDouble() * 10;
     this.remainingLife = this.life;
 
-    for (int i = 30; i < 100; i++) {
-      palette.add(HSLColor.fromAHSL(1.0, 259, .33, i / 100).toColor());
+    for (int i = 70; i < 100; i++) {
+      palette.add(HSLColor.fromAHSL(1.0, 253, .26, i / 100).toColor());
     }
 
     this.color = palette[0];

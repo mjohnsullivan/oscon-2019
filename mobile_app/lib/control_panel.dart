@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile_app/support_widgets.dart';
 import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
@@ -103,6 +103,7 @@ class _LightControlState extends State<LightControl> {
   final int sparkle = AsciiCodec().encode('s')[0];
   final int rainbow = AsciiCodec().encode('o')[0];
   final int twinkle = AsciiCodec().encode('t')[0];
+  final int meteorFall = AsciiCodec().encode('e')[0];
   final int runningLights = AsciiCodec().encode('n')[0];
   String _currentColor = 'blue';
 
@@ -187,42 +188,47 @@ class _LightControlState extends State<LightControl> {
               text: 'Rainbow',
               onPressed: () => bluetooth?.sendMessage(rainbow),
             ),
+            // TODO
             ShimmerButton(
               text: 'Running Lights',
               onPressed: () => bluetooth?.sendMessage(runningLights),
             ),
+            //TODO
             RaisedButton(
               color: Colors.yellow[100],
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   twinkleAnimation,
-                  Text('Twinkle',
-                      style: TextStyle(
-                          fontSize: 30, fontFamily: 'MountainsOfChristmas')),
-                  twinkleAnimation,
+                  Text('Twinkle'),
                 ],
               ),
               onPressed: () => bluetooth?.sendMessage(twinkle),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Meteor(size: Size(50, 70)),
-                RaisedButton(
-                  color: Colors.purple[200],
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text('Meteor Fall',
-                          style:
-                              TextStyle(fontSize: 30, fontFamily: 'SigmarOne')),
-                    ],
-                  ),
-                  onPressed: () => bluetooth?.sendMessage(twinkle),
-                )
-              ],
+            MeteorButton(
+              text: 'Meteor Rain',
+              onPressed: () => bluetooth?.sendMessage(meteorFall),
             ),
+            // TODO
+            Card(
+              child: Text('March'),
+            ),
+            // TODO
+            Card(
+              child: Text('Breathe'),
+            ),
+            // TODO
+            Card(
+              child: Text('Fire'),
+            ),
+            // TODO
+            Card(
+              child: Text('Bouncing Balls'),
+            ),
+            // TODO
+            Card(
+              child: Text('Light Spill'),
+            )
           ],
         ));
   }

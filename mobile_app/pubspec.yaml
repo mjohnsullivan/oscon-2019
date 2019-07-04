@@ -11,7 +11,8 @@ dependencies:
     sdk: flutter
   cloud_firestore: ^0.12.5
   provider: ^3.0.0
-  fireworks: ^0.9.0
+  fireworks:
+    path: /Users/efortuna/github/fireworks
   flutter_blue:
     git: 
       url: https://github.com/efortuna/flutter_blue
