@@ -38,16 +38,17 @@
 uint8_t currentMode = 'l';
 uint32_t currentColor = 4278190080; // white
 uint8_t receivedInput = 'o';
-unsigned long RED_BITMASK = 0x00ff0000UL;
-unsigned long GREEN_BITMASK = 0x0000ff00UL;
-unsigned long BLUE_BITMASK = 0x000000ffUL;
-unsigned long WHITE_BITMASK = 0xff000000UL;
 
 
 // The board pins that are connected to Neopixel strips.
 static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
 #define STRIPLEN 15 // Length of LED strips
 #define NUM_PINS 5 // the number of pins that are connected to neopixel strips.
+#define DEFAULT_BRIGHTNESS 50 // BRIGHTNESS to about 1/5 (max = 255)
+#define RED_BITMASK 0x00ff0000UL
+#define GREEN_BITMASK 0x0000ff00UL
+#define BLUE_BITMASK 0x000000ffUL
+#define WHITE_BITMASK 0xff000000UL
 
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_NUMBERS[0], NEO_RGBW);
@@ -117,7 +118,7 @@ void setup(void)
   for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
     strip.setPin(PIN_NUMBERS[pin_index]);
     strip.show(); // Turn off all pixels to start.
-    strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+    strip.setBrightness(DEFAULT_BRIGHTNESS);
   }
 
   Serial.begin(115200);
@@ -353,7 +354,7 @@ void meteorRain(byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDeca
       // fade brightness all LEDs one step
       for(int j=0; j<STRIPLEN; j++) {
         if( (!meteorRandomDecay) || (random(10)>5) ) {
-          fadeToBlack(j, meteorTrailDecay );        
+          fadeToBlack(j, meteorTrailDecay);        
         }
       }
       
@@ -363,9 +364,9 @@ void meteorRain(byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDeca
           strip.setPixelColor(i-j, currentColor);
         } 
       }
+      strip.show();
     }
    
-    strip.show();
     delay(speedDelay);
   }
 }
@@ -392,9 +393,9 @@ void twinkle(int count, int speedDelay) {
   strip.clear();
   
   for (int i=0; i<count; i++) {
-    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) { ///
-      int pinNum = PIN_NUMBERS[pin_index]; ///
-      strip.setPin(pinNum); ///
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum); 
       strip.setPixelColor(random(STRIPLEN), currentColor);
       strip.show();
     }
@@ -429,32 +430,36 @@ void bouncingBalls(int ballCount) {
   }
 
   while (ballsStillBouncing) {
-    for (int i = 0 ; i < ballCount ; i++) {
-      TimeSinceLastBounce[i] =  millis() - ClockTimeSinceLastBounce[i];
-      Height[i] = 0.5 * Gravity * pow( TimeSinceLastBounce[i]/1000 , 2.0 ) + ImpactVelocity[i] * TimeSinceLastBounce[i]/1000;
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum); 
+      for (int i = 0 ; i < ballCount ; i++) {
+        TimeSinceLastBounce[i] =  millis() - ClockTimeSinceLastBounce[i];
+        Height[i] = 0.5 * Gravity * pow( TimeSinceLastBounce[i]/1000 , 2.0 ) + ImpactVelocity[i] * TimeSinceLastBounce[i]/1000;
+    
+        if ( Height[i] < 0 ) {                      
+          Height[i] = 0;
+          ImpactVelocity[i] = Dampening[i] * ImpactVelocity[i];
+          ClockTimeSinceLastBounce[i] = millis();
+    
+          if ( ImpactVelocity[i] < 0.01 ) {
+            ballBouncing[i]=false;
+          }
+        }
+        Position[i] = round( Height[i] * (STRIPLEN - 1) / StartHeight);
+      }
   
-      if ( Height[i] < 0 ) {                      
-        Height[i] = 0;
-        ImpactVelocity[i] = Dampening[i] * ImpactVelocity[i];
-        ClockTimeSinceLastBounce[i] = millis();
-  
-        if ( ImpactVelocity[i] < 0.01 ) {
-          ballBouncing[i]=false;
+      ballsStillBouncing = false; // assume no balls bouncing
+      for (int i = 0 ; i < ballCount ; i++) {
+        strip.setPixelColor(Position[STRIPLEN - i], currentColor);
+        if ( ballBouncing[i] ) {
+          ballsStillBouncing = true;
         }
       }
-      Position[i] = round( Height[i] * (STRIPLEN - 1) / StartHeight);
+      
+      strip.show();
+      strip.clear();
     }
-
-    ballsStillBouncing = false; // assume no balls bouncing
-    for (int i = 0 ; i < ballCount ; i++) {
-      strip.setPixelColor(Position[i], currentColor);
-      if ( ballBouncing[i] ) {
-        ballsStillBouncing = true;
-      }
-    }
-    
-    strip.show();
-    strip.clear();
   }
 }
 
@@ -592,6 +597,7 @@ void updatePixels() {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
       strip.clear();
+      strip.setBrightness(DEFAULT_BRIGHTNESS);
       strip.show();
     }
     offset = 0;
@@ -606,7 +612,7 @@ void updatePixels() {
   } else if (currentMode == 'o') {
     rainbow();
   } else if (currentMode == 'e') {
-    meteorRain(10, 64, true, 30);
+    meteorRain(10, 64, true, 60);
   } else if (currentMode == 'f') {
     // Fire - Cooling rate, Sparking rate, speed delay
     fire(55,120,15);

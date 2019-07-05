@@ -140,6 +140,7 @@ class _LightControlState extends State<LightControl> {
     var bluetooth =
         widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
+    // TODO: This actually needs a behavior/subject thing to init with a value.
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
           updateMostPopularColor(bluetooth, snapshot);
@@ -220,7 +221,6 @@ class _LightControlState extends State<LightControl> {
               body: Text('Bouncing Balls'),
               onPressed: () => bluetooth?.sendMessage(bouncingBalls),
             ),
-            // TODO
             ColorFillButton(
                 text: 'Color Fill',
                 onPressed: () => bluetooth?.sendMessage(lightSpill)),

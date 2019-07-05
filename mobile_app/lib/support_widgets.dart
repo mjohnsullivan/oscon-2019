@@ -214,24 +214,65 @@ class _CharacterState extends State<Character> {
   }
 }*/
 
-class ColorFillButton extends StatelessWidget {
+class ColorFillButton extends StatefulWidget {
   ColorFillButton({this.onPressed, this.text});
 
   final VoidCallback onPressed;
   final String text;
+
+  @override
+  _ColorFillButtonState createState() => _ColorFillButtonState();
+}
+
+class _ColorFillButtonState extends State<ColorFillButton>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 60),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BasicButton(
-        onPressed: onPressed,
-        body: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.grey[600], Colors.grey[800]])),
-          child: Center(
+      onPressed: widget.onPressed,
+      body: Stack(
+        children: <Widget>[
+          Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.yellow[600], Colors.yellow[800]])),
+              height: 200,
+              width: 200),
+          SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0, -1),
+                end: Offset(0, 1),
+              ).animate(_controller),
+              child: Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.blue[600], Colors.blue[800]])),
+                  height: 200,
+                  width: 200)),
+          Center(
             child: Text(
-              text,
+              widget.text,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 30,
@@ -239,7 +280,9 @@ class ColorFillButton extends StatelessWidget {
               ),
             ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 }
 
