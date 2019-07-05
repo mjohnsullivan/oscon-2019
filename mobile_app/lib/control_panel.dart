@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile_app/support_widgets.dart';
 import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
@@ -14,9 +13,9 @@ class BluetoothPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        builder: (_) => BluetoothState(),
-        child: Consumer<BluetoothState>(builder: (BuildContext context,
-            BluetoothState bluetoothState, Widget child) {
+        builder: (_) => Bluetooth(),
+        child: Consumer<Bluetooth>(builder:
+            (BuildContext context, Bluetooth bluetoothState, Widget child) {
           switch (bluetoothState.currentState) {
             case BleAppState.invalid:
               return Text('This device does not support bluetooth.');
@@ -36,7 +35,7 @@ class ScanningPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: Provider.of<BluetoothState>(context).scanForDevices(),
+        stream: Provider.of<Bluetooth>(context).scanForDevices(),
         builder: (context, snapshot) {
           if (snapshot.hasData)
             return Scaffold(body: AvailableDevices(snapshot.data));
@@ -76,8 +75,8 @@ class FailedToConnect extends StatelessWidget {
         ),
         RaisedButton(
             child: Text('Look for another device.'),
-            onPressed: () => Provider.of<BluetoothState>(context)
-                .setMode(BleAppState.searching))
+            onPressed: () =>
+                Provider.of<Bluetooth>(context).setMode(BleAppState.searching))
       ],
     );
   }
@@ -105,10 +104,13 @@ class _LightControlState extends State<LightControl> {
   final int twinkle = AsciiCodec().encode('t')[0];
   final int meteorFall = AsciiCodec().encode('e')[0];
   final int runningLights = AsciiCodec().encode('n')[0];
-  String _currentColor = 'blue';
+  final int march = AsciiCodec().encode('m')[0];
+  final int breathe = AsciiCodec().encode('h')[0];
+  final int fire = AsciiCodec().encode('f')[0];
+  final int bouncingBalls = AsciiCodec().encode('a')[0];
+  String _currentColor;
 
-  void updateMostPopularColor(
-      BluetoothState bluetooth, QuerySnapshot snapshot) {
+  void updateMostPopularColor(Bluetooth bluetooth, QuerySnapshot snapshot) {
     if (snapshot?.documents != null) {
       String mostPopularColor;
       // Find the highest scoring Color currently.
@@ -118,7 +120,7 @@ class _LightControlState extends State<LightControl> {
         String color = d.documentID;
         var votes = d['votes'] as num;
 
-        if (votes > curValue) {
+        if (votes > curValue && votes > 0) {
           curValue = votes;
           mostPopularColor = color;
         }
@@ -135,11 +137,8 @@ class _LightControlState extends State<LightControl> {
 
   @override
   Widget build(BuildContext context) {
-    var twinkleAnimation = SpinKitFadingFour(
-      itemBuilder: (_, __) => Icon(FontAwesomeIcons.solidCircle, size: 10),
-    );
     var bluetooth =
-        widget.useBluetooth ? Provider.of<BluetoothState>(context) : null;
+        widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
@@ -193,41 +192,38 @@ class _LightControlState extends State<LightControl> {
               onPressed: () => bluetooth?.sendMessage(runningLights),
             ),
             //TODO
-            RaisedButton(
-              color: Colors.yellow[100],
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  twinkleAnimation,
-                  Text('Twinkle'),
-                ],
-              ),
+            TwinkleButton(
+              text: 'Twinkle',
               onPressed: () => bluetooth?.sendMessage(twinkle),
             ),
             MeteorButton(
               text: 'Meteor Rain',
               onPressed: () => bluetooth?.sendMessage(meteorFall),
             ),
-            // TODO
-            Card(
-              child: Text('March'),
+            // TODO -- think space invaders
+            BasicButton(
+              body: Text('March'),
+              onPressed: () => bluetooth?.sendMessage(march),
             ),
             // TODO
-            Card(
-              child: Text('Breathe'),
+            BasicButton(
+              body: Text('Breathe'),
+              onPressed: () => bluetooth?.sendMessage(breathe),
             ),
             // TODO
-            Card(
-              child: Text('Fire'),
+            BasicButton(
+              body: Text('Fire'),
+              onPressed: () => bluetooth?.sendMessage(fire),
             ),
             // TODO
-            Card(
-              child: Text('Bouncing Balls'),
+            BasicButton(
+              body: Text('Bouncing Balls'),
+              onPressed: () => bluetooth?.sendMessage(bouncingBalls),
             ),
             // TODO
-            Card(
-              child: Text('Light Spill'),
-            )
+            ColorFillButton(
+                text: 'Color Fill',
+                onPressed: () => bluetooth?.sendMessage(lightSpill)),
           ],
         ));
   }
@@ -244,13 +240,13 @@ class AvailableDevices extends StatelessWidget {
             .map<Widget>((result) => ListTile(
                   title: Text(result.device.name),
                   subtitle: Text(result.device.id.toString()),
-                  onTap: () => Provider.of<BluetoothState>(context)
+                  onTap: () => Provider.of<Bluetooth>(context)
                       .connectToDevice(result.device),
                 ))
             .toList()
               ..add(IconButton(
                 icon: Icon(Icons.refresh),
-                onPressed: () => Provider.of<BluetoothState>(context)
+                onPressed: () => Provider.of<Bluetooth>(context)
                     .setMode(BleAppState.searching),
               )));
   }

@@ -29,14 +29,14 @@
 // 'm' = march, a set of (currently 10) pixels march down the strip.
 // 'n' = running lights
 // 'e' = meteor rain
-// 't' = breathe
+// 'h' = breathe
 // 'f' = fire     (https://github.com/i-protoss/wave)??
 // 'a' = bouncing balls
 // 'o' = rainbow
 //  'l' = light spill, that is, spill down the pixel strip and stay on with a given color.
 // Any other character sets all pixels to off.
 uint8_t currentMode = 'l';
-uint32_t currentColor = 0;
+uint32_t currentColor = 4278190080; // white
 uint8_t receivedInput = 'o';
 unsigned long RED_BITMASK = 0x00ff0000UL;
 unsigned long GREEN_BITMASK = 0x0000ff00UL;
@@ -182,7 +182,7 @@ void rainbow() {
   // Color wheel has a range of 65536 but it's OK if we roll over, so
   // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
   // means we'll make 5*65536/256 = 1280 passes through this outer loop:
-  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+  for(long firstPixelHue = 0; firstPixelHue < 3*65536; firstPixelHue += 256) {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
@@ -246,7 +246,7 @@ void fire(int cooling, int sparking, int speedDelay) {
 }
 
 void breathe(int timeDelay) {
-  float speedFactor = 0.008; // I don't actually know what would look good
+  float speedFactor = 0.008;
   
   // Make the lights breathe
   for (int i = 0; i < 65535; i++) {
@@ -255,7 +255,12 @@ void breathe(int timeDelay) {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
+
       strip.setBrightness(intensity);
+      
+      for (int ledNumber=0; ledNumber<STRIPLEN; ledNumber++) {
+        strip.setPixelColor(ledNumber, currentColor);
+      }
       strip.show();
     }
     //Wait a bit before continuing to breathe
@@ -463,21 +468,16 @@ void pixelLine(int color, int numLeds, bool clearStrip, int delayTime) {
 
 void sparkle() {
   // if colorUpdate is true, we need to set all the other strands we didn't set to the solid new color.
-  int selectedStrandIndexes[] = {random(NUM_PINS), random(NUM_PINS)};
   for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
     int pinNum = PIN_NUMBERS[pin_index];
     strip.setPin(pinNum);
     strip.clear();
 
-    if (pin_index == selectedStrandIndexes[0] || pin_index == selectedStrandIndexes[1]) {
-      strip.setPixelColor(random(STRIPLEN), currentColor);
-      strip.setPixelColor(random(STRIPLEN), currentColor);
-      strip.setPixelColor(random(STRIPLEN), currentColor);
-      strip.setPixelColor(random(STRIPLEN), currentColor);
-      delay(50);
-    } else {
-      wholeStripColor();
-    }
+    strip.setPixelColor(random(STRIPLEN), currentColor);
+    strip.setPixelColor(random(STRIPLEN), currentColor);
+    strip.setPixelColor(random(STRIPLEN), currentColor);
+    strip.setPixelColor(random(STRIPLEN), currentColor);
+    delay(50);
     strip.show();
   }
 }
@@ -492,17 +492,21 @@ void runningLights(int timeDelay) {
   for(int i=0; i<STRIPLEN*2; i++)
   {
     cur_pos++; // = 0; //Position + Rate;
-    for(int i=0; i<STRIPLEN; i++) {
-      // sine wave, 3 offset waves make a rainbow!
-      //float level = sin(i+cur_pos) * 127 + 128;
-      //strip.setPixelColor((i,level,0,0, 0);
-      //float level = sin(i+cur_pos) * 127 + 128;
-      strip.setPixelColor(i,((sin(i+cur_pos) * 127 + 128)/255)*r,
-                             ((sin(i+cur_pos) * 127 + 128)/255)*g,
-                             ((sin(i+cur_pos) * 127 + 128)/255)*b, 0);
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+      for(int i=0; i<STRIPLEN; i++) {
+        // sine wave, 3 offset waves make a rainbow!
+        //float level = sin(i+cur_pos) * 127 + 128;
+        //strip.setPixelColor((i,level,0,0, 0);
+        //float level = sin(i+cur_pos) * 127 + 128;
+        strip.setPixelColor(i,((sin(i+cur_pos) * 127 + 128)/255)*r,
+                               ((sin(i+cur_pos) * 127 + 128)/255)*g,
+                               ((sin(i+cur_pos) * 127 + 128)/255)*b, 0);
+      }
+      
+      strip.show();
     }
-    
-    strip.show();
     delay(timeDelay);
   }
 }
@@ -517,16 +521,11 @@ void drawPixels() {
   // Show the current color tag in the Serial Monitor.
   Serial.println("");
   Serial.print("Current mode: ");
-  Serial.println(currentMode);
+  Serial.println((char)currentMode);
   Serial.print("Current color (if applicable): ");
   Serial.println(currentColor);
 
-  switch (receivedInput) {
-    case 'w':
-      rainbow();
-    default: 
-      updatePixels();
-  }
+  updatePixels();
 }
 
 void pollBluetooth() {
@@ -563,8 +562,6 @@ void pollBluetooth() {
 }
 
 void updatePixels() {
-  // TODO: might need to  clear strip if we are switching the mode. and think about the switching process!
-
   uint8_t newMode = 0;
   uint32_t newColor = 0;
   bool colorUpdate = false; // only used for some effects that are applied to a subset of strips.
@@ -597,6 +594,7 @@ void updatePixels() {
       strip.clear();
       strip.show();
     }
+    offset = 0;
   }
   if (newColor != 0 && newColor != currentColor) {
     currentColor = newColor;
@@ -605,6 +603,8 @@ void updatePixels() {
 
   if (currentMode == 's') {
     sparkle();
+  } else if (currentMode == 'o') {
+    rainbow();
   } else if (currentMode == 'e') {
     meteorRain(10, 64, true, 30);
   } else if (currentMode == 'f') {
@@ -617,9 +617,8 @@ void updatePixels() {
     bouncingBalls(3);
   } else if (currentMode == 'n') {
     runningLights(50);
-  } else if (currentMode == 't') {
-    if (colorUpdate) wholeStripColor();
-    breathe(10);
+  } else if (currentMode == 'h') {
+    breathe(1);
   } else if (currentMode == 'l') {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
@@ -629,15 +628,10 @@ void updatePixels() {
     }
     offset = (offset + 1) % (STRIPLEN);
   } else if (currentMode == 'm') {
-    int selectedStrandIndexes[] = {random(NUM_PINS), random(NUM_PINS)};
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
-      if (pin_index == selectedStrandIndexes[0] || pin_index == selectedStrandIndexes[1]) {
-        pixelLine(currentColor, 10, true, 150);
-      } else {
-        wholeStripColor();
-      }
+      pixelLine(currentColor, 10, true, 80);
       strip.show();
     }
     // Add one to the offset, and set it back to 0 when

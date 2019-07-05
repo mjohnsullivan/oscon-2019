@@ -17,7 +17,7 @@ class WearablesApp extends StatefulWidget {
 
 class _WearablesAppState extends State<WearablesApp> {
   int _selectedIndex = 0;
-  final _pages = [LightControl(useBluetooth: false), Votes()];
+  final _pages = [BluetoothPage(), Votes()];
   // FALLBACK STATE for technical difficulties:
   //final _pages = [LightControl(useBluetooth: false), Votes()];
 
@@ -28,7 +28,8 @@ class _WearablesAppState extends State<WearablesApp> {
             Firestore.instance.collection('votes').snapshots(),
         child: MaterialApp(
             home: Scaffold(
-          body: Center(child: _pages[_selectedIndex]),
+          body: Center(
+              child: IndexedStack(index: _selectedIndex, children: _pages)),
           bottomNavigationBar: BottomNavigationBar(
             items: const [
               BottomNavigationBarItem(

@@ -10,7 +10,7 @@ enum BleAppState {
   failedToConnect,
 }
 
-class BluetoothState with ChangeNotifier {
+class Bluetooth with ChangeNotifier {
   BleAppState _currentState = BleAppState.searching;
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final devices = Map<DeviceIdentifier, ScanResult>();
@@ -53,7 +53,11 @@ class BluetoothState with ChangeNotifier {
   }
 
   sendMessage(int instruction) async {
-    _characteristic?.write([instruction]);
+    try {
+      _characteristic?.write([instruction]);
+    } on TimeoutException {
+      // fail silently if we don't connect :-P
+    }
   }
 
   /// Find the UART Write characteristic to send messages between the app and the BLE devicd
