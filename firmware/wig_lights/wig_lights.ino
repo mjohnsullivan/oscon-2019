@@ -45,12 +45,14 @@ static int PIN_NUMBERS[5] = { 5, 6, 10, 11, 12 };
 #define STRIPLEN 15 // Length of LED strips
 #define NUM_PINS 5 // the number of pins that are connected to neopixel strips.
 #define DEFAULT_BRIGHTNESS 50 // BRIGHTNESS to about 1/5 (max = 255)
-#define RED_BITMASK 0x00ff0000UL
-#define GREEN_BITMASK 0x0000ff00UL
+#define GREEN_BITMASK 0x00ff0000UL
+#define RED_BITMASK 0x0000ff00UL
 #define BLUE_BITMASK 0x000000ffUL
 #define WHITE_BITMASK 0xff000000UL
 
 
+/// SPECIAL NOTE!!!!! Although the Adafruit Neopixel library claims it's in RGBW order, based on my experimentation
+/// it would seem it is actually in GRBW order (!!!!!!) Take care!!!
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPLEN, PIN_NUMBERS[0], NEO_RGBW);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
@@ -183,7 +185,7 @@ void rainbow() {
   // Color wheel has a range of 65536 but it's OK if we roll over, so
   // just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
   // means we'll make 5*65536/256 = 1280 passes through this outer loop:
-  for(long firstPixelHue = 0; firstPixelHue < 3*65536; firstPixelHue += 256) {
+  for(long firstPixelHue = 0; firstPixelHue < 2*65536; firstPixelHue += 256) {
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
       int pinNum = PIN_NUMBERS[pin_index];
       strip.setPin(pinNum);
@@ -250,7 +252,7 @@ void breathe(int timeDelay) {
   float speedFactor = 0.008;
   
   // Make the lights breathe
-  for (int i = 0; i < 65535; i++) {
+  for (int i = 0; i < 1000; i++) {
     // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
     float intensity = 255 /2.0 * (1.0 + sin(speedFactor * i));
     for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
@@ -278,115 +280,125 @@ void setPixelHeatColor (int pixelIndex, byte temperature) {
   heatramp <<= 2; // scale up to 0..252
 
   // specified color breakdown
-  uint8_t r, g, b, w;
-  r = (currentColor & RED_BITMASK) >> 16;
-  g = (currentColor & GREEN_BITMASK) >> 8;
+  uint8_t r, g, b;
+  r = (currentColor & RED_BITMASK) >> 8;
+  g = (currentColor & GREEN_BITMASK) >> 16;
   b = (currentColor & BLUE_BITMASK);
-  w = (currentColor & WHITE_BITMASK);
 
+  // This makes the fire come from the tips of the hair. 
+  // To come from the "roots", just set pixelToSet to pixelIndex.
+  int pixelToSet = STRIPLEN - pixelIndex; 
   // A total hack to support differnet color fires:
-  if (r >= 128 & g == 0 && b == 0) {
-    // red fire.
+  if (g >= 128 & r == 0 && b == 0) {
+    // green fire.
     // figure out which third of the spectrum we're in:
     if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, 255, 255, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 255, 255, heatramp, 0);
     } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, 255, heatramp, 0, 0);
+      strip.setPixelColor(pixelToSet, 255, heatramp, 0, 0);
     } else {                               // coolest
-      strip.setPixelColor(pixelIndex, heatramp, 0, 0, 0);
+      strip.setPixelColor(pixelToSet, heatramp, 0, 0, 0);
     }
-  } else if (g >= 128 & r == 0 && b == 0) {
-    // green spectrum fire. 
+  } else if (r >= 128 & g == 0 && b == 0) {
+    // red spectrum fire. 
     if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, 255, 255, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 255, 255, heatramp, 0);
     } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, 0, 255, heatramp, 0);
+      strip.setPixelColor(pixelToSet, heatramp, 255, 0, 0);
     } else {                               // coolest
-      strip.setPixelColor(pixelIndex, 0, heatramp, 0, 0);
+      strip.setPixelColor(pixelToSet, 0, heatramp, 0, 0);
     }
-  } else if (b >= 128 & r == 0 && b == 0) {
+  } else if (b >= 128 & r == 0 && g == 0) {
     // blue spectrum fire.
     if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, 255, 255, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 255, 255, heatramp, 0);
     } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, 0, heatramp, 255, 0);
+      strip.setPixelColor(pixelToSet, 0, heatramp, 255, 0);
     } else {                               // coolest
-      strip.setPixelColor(pixelIndex, 0, 0, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 0, 0, heatramp, 0);
     }
   } else if (r >= 128 & g >= 128 && b == 0) {
     // "yellow" spectrum fire.
     if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, 255, 255, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 255, 255, heatramp, 0);
     } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, heatramp, heatramp, 0, 0);
+      strip.setPixelColor(pixelToSet, heatramp, 255, 0, 0);
     } else {                               // coolest
-      strip.setPixelColor(pixelIndex, heatramp, 0, 0, 0);
-    }
-  } else if (w > 0) {
-    // white-ish fire.
-    if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, 0, 0, heatramp, 255);
-    } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, 0, heatramp, 0, 255);
-    } else {                               // coolest
-      strip.setPixelColor(pixelIndex, 0, 0, 0, heatramp);
+      strip.setPixelColor(pixelToSet, heatramp, heatramp, 0, 0);
     }
   } else {
-    // some weird fallback attempting to incorporate the values, still red-ish:
+    // white-ish fire.
     if( t192 > 0x80) {                     // hottest
-      strip.setPixelColor(pixelIndex, r, g, heatramp, 0);
+      strip.setPixelColor(pixelToSet, 0, 0, 0, 255);
     } else if( t192 > 0x40 ) {             // middle
-      strip.setPixelColor(pixelIndex, r, heatramp, 0, 0);
+      strip.setPixelColor(pixelToSet, 0, 0, heatramp, 255);
     } else {                               // coolest
-      strip.setPixelColor(pixelIndex, heatramp, 0, 0, 0);
+      strip.setPixelColor(pixelToSet, 0, 0, 0, heatramp);
     }
-  }
+  } 
 }
 
-void meteorRain(byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int speedDelay) {  
-  strip.clear();
+void meteorRain(byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
+  for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
+    strip.clear();
+    strip.show();
+  }
+
+  byte r, g, b, w;
+  r = (currentColor & RED_BITMASK) >> 8;
+  g = (currentColor & GREEN_BITMASK) >> 16;
+  b = (currentColor & BLUE_BITMASK);
+  w = (currentColor & WHITE_BITMASK) >> 24;
   
-  for(int i = 0; i < STRIPLEN+STRIPLEN; i++) {
-    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) { ///
-      int pinNum = PIN_NUMBERS[pin_index]; ///
-      strip.setPin(pinNum); ///
-    
+  for(int i = 0; i < STRIPLEN+STRIPLEN; i++) { 
+    for (int pin_index = 0; pin_index < NUM_PINS; pin_index++) {
+      int pinNum = PIN_NUMBERS[pin_index];
+      strip.setPin(pinNum);
       // fade brightness all LEDs one step
       for(int j=0; j<STRIPLEN; j++) {
         if( (!meteorRandomDecay) || (random(10)>5) ) {
-          fadeToBlack(j, meteorTrailDecay);        
+          fadeToBlack(j, meteorTrailDecay );        
         }
       }
       
       // draw meteor
       for(int j = 0; j < meteorSize; j++) {
         if( ( i-j <STRIPLEN) && (i-j>=0) ) {
-          strip.setPixelColor(i-j, currentColor);
+          strip.setPixelColor(i-j, g, r, b, w); //red, green, blue);
         } 
       }
+     
       strip.show();
     }
-   
-    delay(speedDelay);
+    delay(SpeedDelay);
   }
 }
 
 // used by meteorrain
-void fadeToBlack(int neoPixelIndex, byte fadeValue) {
+void fadeToBlack(int ledNo, byte fadeValue) {
+    // NeoPixel
     uint32_t oldColor;
-    uint8_t r, g, b;
+    uint8_t r, g, b, w;
     int value;
     
-    oldColor = strip.getPixelColor(neoPixelIndex);
-    r = (oldColor & RED_BITMASK) >> 16;
-    g = (oldColor & GREEN_BITMASK) >> 8;
+    oldColor = strip.getPixelColor(ledNo);
+    r = (oldColor & RED_BITMASK) >> 8;
+    g = (oldColor & GREEN_BITMASK) >> 16;
     b = (oldColor & BLUE_BITMASK);
+    w = (oldColor & WHITE_BITMASK) >> 24;
+    // TODO: these are going to have to change.
+    //r = (oldColor & 0x00ff0000UL) >> 16;
+    //g = (oldColor & 0x0000ff00UL) >> 8;
+    //b = (oldColor & 0x000000ffUL);
 
     r=(r<=10)? 0 : (int) r-(r*fadeValue/256);
     g=(g<=10)? 0 : (int) g-(g*fadeValue/256);
     b=(b<=10)? 0 : (int) b-(b*fadeValue/256);
+    w=(w<=10)? 0 : (int) w-(w*fadeValue/256);
     
-    strip.setPixelColor(neoPixelIndex, r,g,b, 0); 
+    strip.setPixelColor(ledNo, g, r, b, w);
 }
 
 void twinkle(int count, int speedDelay) {
@@ -451,7 +463,7 @@ void bouncingBalls(int ballCount) {
   
       ballsStillBouncing = false; // assume no balls bouncing
       for (int i = 0 ; i < ballCount ; i++) {
-        strip.setPixelColor(Position[STRIPLEN - i], currentColor);
+        strip.setPixelColor(STRIPLEN - Position[i], currentColor);
         if ( ballBouncing[i] ) {
           ballsStillBouncing = true;
         }
@@ -490,9 +502,10 @@ void sparkle() {
 void runningLights(int timeDelay) {
   int cur_pos=0;
   uint8_t r, g, b, w;
-  r = (currentColor & RED_BITMASK) >> 16;
-  g = (currentColor & GREEN_BITMASK) >> 8;
+  r = (currentColor & RED_BITMASK) >> 8;
+  g = (currentColor & GREEN_BITMASK) >> 16;
   b = (currentColor & BLUE_BITMASK);
+  w = (currentColor & WHITE_BITMASK) >> 24;
   
   for(int i=0; i<STRIPLEN*2; i++)
   {
@@ -505,9 +518,11 @@ void runningLights(int timeDelay) {
         //float level = sin(i+cur_pos) * 127 + 128;
         //strip.setPixelColor((i,level,0,0, 0);
         //float level = sin(i+cur_pos) * 127 + 128;
-        strip.setPixelColor(i,((sin(i+cur_pos) * 127 + 128)/255)*r,
-                               ((sin(i+cur_pos) * 127 + 128)/255)*g,
-                               ((sin(i+cur_pos) * 127 + 128)/255)*b, 0);
+        float value = (sin(i+cur_pos) * 127 + 128)/255;
+        strip.setPixelColor(i,value*r,
+                              value*g,
+                              value*b,
+                              value*w);
       }
       
       strip.show();
@@ -612,10 +627,10 @@ void updatePixels() {
   } else if (currentMode == 'o') {
     rainbow();
   } else if (currentMode == 'e') {
-    meteorRain(10, 64, true, 60);
+    meteorRain(4, 10, true, 75);
   } else if (currentMode == 'f') {
     // Fire - Cooling rate, Sparking rate, speed delay
-    fire(55,120,15);
+    fire(90,120,15);
   } else if (currentMode == 't') {
     // Twinkle - Color (red, green, blue), count, speed delay, only one twinkle (true/false) 
     twinkle(10, 100);

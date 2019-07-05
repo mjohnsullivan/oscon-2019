@@ -17,9 +17,9 @@ class WearablesApp extends StatefulWidget {
 
 class _WearablesAppState extends State<WearablesApp> {
   int _selectedIndex = 0;
-  //final _pages = [BluetoothPage(), Votes()];
+  final _pages = [BluetoothPage(), Votes()];
   // FALLBACK STATE for technical difficulties:
-  final _pages = [LightControl(useBluetooth: false), Votes()];
+  //final _pages = [LightControl(useBluetooth: false), Votes()];
 
   @override
   Widget build(BuildContext context) {
