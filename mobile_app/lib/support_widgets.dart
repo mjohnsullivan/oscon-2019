@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -267,7 +268,7 @@ class _ColorFillButtonState extends State<ColorFillButton>
                       gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.blue[600], Colors.blue[800]])),
+                          colors: [Colors.green[600], Colors.green[800]])),
                   height: 200,
                   width: 200)),
           Center(
@@ -493,5 +494,54 @@ class Particle {
           Rect.fromCircle(center: this.location, radius: this.radius));
 
     canvas.drawCircle(this.location, this.radius, painter);
+  }
+}
+
+class FadingButton extends StatefulWidget {
+  FadingButton({this.onPressed, this.text});
+
+  final VoidCallback onPressed;
+  final String text;
+
+  @override
+  _FadingButtonState createState() => _FadingButtonState();
+}
+
+class _FadingButtonState extends State<FadingButton> {
+  Color _color;
+  final Color defaultColor = Colors.blue;
+  @override
+  void initState() {
+    _color = defaultColor;
+    Timer.periodic(Duration(seconds: 8), (_) {
+      if (_color == defaultColor) {
+        setState(() => _color = Colors.grey[800]);
+      } else {
+        setState(() => _color = defaultColor);
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BasicButton(
+        onPressed: widget.onPressed,
+        body: AnimatedContainer(
+            height: 300,
+            width: 300,
+            duration: Duration(seconds: 4),
+            color: _color,
+            child: Center(
+              child: Text(
+                widget.text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey[100],
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )));
   }
 }

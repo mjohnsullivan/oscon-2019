@@ -206,9 +206,8 @@ class _LightControlState extends State<LightControl> {
               body: Text('March'),
               onPressed: () => bluetooth?.sendMessage(march),
             ),
-            // TODO
-            BasicButton(
-              body: Text('Breathe'),
+            FadingButton(
+              text: 'Breathe',
               onPressed: () => bluetooth?.sendMessage(breathe),
             ),
             // TODO
