@@ -215,6 +215,57 @@ class _CharacterState extends State<Character> {
   }
 }*/
 
+class FireButton extends StatefulWidget {
+  FireButton({this.onPressed, this.text});
+
+  final VoidCallback onPressed;
+  final String text;
+
+  @override
+  _FireButtonState createState() => _FireButtonState();
+}
+
+class _FireButtonState extends State<FireButton> {
+  double _opacity = 0;
+  Random random = Random();
+  @override
+  void initState() {
+    setVisibility();
+    super.initState();
+  }
+
+  setVisibility() {
+    setState(() => _opacity = 0);
+    Future.delayed(Duration(milliseconds: random.nextInt(1000)), () {
+      setState(() => _opacity = 1);
+      Future.delayed(
+          Duration(milliseconds: random.nextInt(500)), () => setVisibility());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      onPressed: widget.onPressed,
+      text: widget.text,
+      fontColor: Colors.white,
+      background: Stack(
+        children: <Widget>[
+          Image.asset('assets/fire.jpg', fit: BoxFit.fill, height: 200),
+          AnimatedOpacity(
+              opacity: _opacity,
+              duration: Duration(milliseconds: 500),
+              child: Container(
+                color: Colors.black,
+                height: 200,
+                width: 200,
+              )),
+        ],
+      ),
+    );
+  }
+}
+
 class ColorFillButton extends StatefulWidget {
   ColorFillButton({this.onPressed, this.text});
 

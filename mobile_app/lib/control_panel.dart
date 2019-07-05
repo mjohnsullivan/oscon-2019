@@ -211,8 +211,8 @@ class _LightControlState extends State<LightControl> {
               onPressed: () => bluetooth?.sendMessage(breathe),
             ),
             // TODO
-            BasicButton(
-              body: Text('Fire'),
+            FireButton(
+              text: 'Fire',
               onPressed: () => bluetooth?.sendMessage(fire),
             ),
             // TODO
