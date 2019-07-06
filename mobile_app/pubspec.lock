@@ -144,10 +144,12 @@ packages:
   progress_indicators:
     dependency: "direct main"
     description:
-      name: progress_indicators
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.2"
+      path: "."
+      ref: HEAD
+      resolved-ref: "7d8be908c06588ce4c25a4545b1fc6e30f166023"
+      url: "https://github.com/efortuna/progress_indicators"
+    source: git
+    version: "0.1.4"
   protobuf:
     dependency: transitive
     description:

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fireworks/fireworks.dart';
 
@@ -187,7 +188,6 @@ class _CharacterState extends State<Character> {
         opacity: widget._opacity, child: Text(widget.character));
   }
 }*/
-// TODO
 /*class AnimatedGradientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -237,7 +237,7 @@ class _FireButtonState extends State<FireButton> {
   setVisibility() {
     setState(() => _opacity = 0);
     Future.delayed(Duration(milliseconds: random.nextInt(1000)), () {
-      setState(() => _opacity = 1);
+      setState(() => _opacity = .4);
       Future.delayed(
           Duration(milliseconds: random.nextInt(500)), () => setVisibility());
     });
@@ -594,5 +594,33 @@ class _FadingButtonState extends State<FadingButton> {
                 ),
               ),
             )));
+  }
+}
+
+class BouncingBallButton extends StatelessWidget {
+  BouncingBallButton({this.onPressed});
+
+  final VoidCallback onPressed;
+  @override
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      text: '',
+      background: Opacity(
+          opacity: .7,
+          child: Image.asset('assets/ball_pit.jpg',
+              fit: BoxFit.cover, height: 400)),
+      animation: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          JumpingText('Bouncing',
+              end: Offset(0, -.05),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          JumpingText('Balls',
+              end: Offset(0, -.05),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+        ],
+      ),
+      onPressed: onPressed,
+    );
   }
 }

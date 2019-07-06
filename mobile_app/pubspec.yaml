@@ -19,7 +19,9 @@ dependencies:
   font_awesome_flutter: ^8.4.0
   flutter_spinkit: ^3.1.0
   shimmer: ^1.0.0
-  progress_indicators: ^0.1.2
+  progress_indicators: #^0.1.4
+    git:
+      url: https://github.com/efortuna/progress_indicators
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +36,7 @@ flutter:
     - assets/snow_sparkle.jpg
     - assets/sparkler.jpg
     - assets/colorful_lights.jpg
+    - assets/ball_pit.jpg
   fonts:
     - family: MountainsOfChristmas
       fonts:
