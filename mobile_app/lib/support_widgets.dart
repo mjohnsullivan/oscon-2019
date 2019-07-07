@@ -129,9 +129,6 @@ class TwinkleButton extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
-    // var twinkleAnimation = SpinKitFadingFour(
-    //   itemBuilder: (_, __) => Icon(FontAwesomeIcons.solidCircle, size: 10),
-    // );
     return BasicImageButton(
       fontColor: Colors.black,
       background: Opacity(
@@ -561,10 +558,11 @@ class FadingButton extends StatefulWidget {
 class _FadingButtonState extends State<FadingButton> {
   Color _color;
   final Color defaultColor = Colors.blue;
+  Timer _timer;
   @override
   void initState() {
     _color = defaultColor;
-    Timer.periodic(Duration(seconds: 8), (_) {
+    _timer = Timer.periodic(Duration(seconds: 8), (_) {
       if (_color == defaultColor) {
         setState(() => _color = Colors.grey[800]);
       } else {
@@ -572,6 +570,12 @@ class _FadingButtonState extends State<FadingButton> {
       }
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -621,6 +625,60 @@ class BouncingBallButton extends StatelessWidget {
         ],
       ),
       onPressed: onPressed,
+    );
+  }
+}
+
+typedef ToggleValue = void Function(bool value);
+
+class OnOffSwitch extends StatefulWidget {
+  OnOffSwitch({this.onPressed});
+
+  final ToggleValue onPressed;
+  @override
+  _OnOffSwitchState createState() => _OnOffSwitchState();
+}
+
+class _OnOffSwitchState extends State<OnOffSwitch> {
+  bool _on = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      background: AnimatedSwitcher(
+        duration: Duration(seconds: 1),
+        child: _on
+            ? Container(
+                key: ValueKey(1),
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0, -0.3),
+                    radius: 0.7,
+                    colors: [
+                      Colors.yellow,
+                      Colors.orange,
+                    ],
+                    stops: [0.4, 1.0],
+                  ),
+                ),
+              )
+            : Container(
+                key: ValueKey(2),
+                color: Colors.white,
+                height: 300,
+                width: 300,
+              ),
+      ),
+      animation: Column(children: [
+        Image.asset('assets/light_bulb.png', fit: BoxFit.cover, height: 125),
+        Text(_on ? 'Lights!' : 'Off',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+      ]),
+      text: '',
+      onPressed: () {
+        setState(() => _on = !_on);
+        widget.onPressed(_on);
+      },
     );
   }
 }

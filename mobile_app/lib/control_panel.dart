@@ -152,33 +152,16 @@ class _LightControlState extends State<LightControl> {
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           children: <Widget>[
-            Card(
-              child: AnimatedContainer(
-                  duration: Duration(seconds: 1),
-                  color: Color(0xfffff980),
-                  child: Text('Let there be light!')),
-            ),
-            Container(
-              color: Colors.blue,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('Let there be light!'),
-                  Switch(
-                    value: _on,
-                    onChanged: (bool value) {
-                      setState(() => _on = value);
-                      // send the on/off signal: off: 0x4e
-                      if (_on) {
-                        bluetooth?.sendMessage(offSignal);
-                      } else {
-                        bluetooth?.sendMessage(lightSpill);
-                      }
-                    },
-                    activeColor: Colors.orange,
-                  ),
-                ],
-              ),
+            OnOffSwitch(
+              onPressed: (bool value) {
+                setState(() => _on = value);
+                // send the on/off signal: off: 0x4e
+                if (_on) {
+                  bluetooth?.sendMessage(offSignal);
+                } else {
+                  bluetooth?.sendMessage(lightSpill);
+                }
+              },
             ),
             SparkleButton(
               text: 'Sparkle',

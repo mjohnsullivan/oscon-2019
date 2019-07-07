@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   cloud_firestore: ^0.12.5
   provider: ^3.0.0
-  fireworks: ^0.9.2
+  fireworks: ^0.9.3
   flutter_blue:
     git: 
       url: https://github.com/efortuna/flutter_blue
@@ -37,6 +37,9 @@ flutter:
     - assets/sparkler.jpg
     - assets/colorful_lights.jpg
     - assets/ball_pit.jpg
+    - assets/light_bulb_outline_whole.png
+    - assets/light_bulb_outline.png
+    - assets/light_bulb.png
   fonts:
     - family: MountainsOfChristmas
       fonts:
