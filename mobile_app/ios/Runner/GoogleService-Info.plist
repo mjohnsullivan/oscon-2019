@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>150136682850-pqte0ki2rf92h3jogis7jjh6411728dh.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.150136682850-pqte0ki2rf92h3jogis7jjh6411728dh</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAby9f5GoyQD2dK4dyChCm8uJxs9HDHjwY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>150136682850</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.mobileApp</string>
+	<key>PROJECT_ID</key>
+	<string>oscon-voter</string>
+	<key>STORAGE_BUCKET</key>
+	<string>oscon-voter.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:150136682850:ios:0a756a3fbdfbe68e</string>
+	<key>DATABASE_URL</key>
+	<string>https://oscon-voter.firebaseio.com</string>
+</dict>
+</plist>

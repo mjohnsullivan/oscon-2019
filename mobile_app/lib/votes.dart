@@ -11,17 +11,14 @@ const colorMap = {
 
 void _resetDatabase() async {
   final collection = Firestore.instance.collection('votes');
-  collection.getDocuments().then((query) => query.documents.forEach((doc) {
-        if (doc.data.containsKey('votes') &&
-            colorMap.containsKey(doc.documentID))
-          Firestore.instance
-              .document('votes/${doc.documentID}')
-              .setData({'votes': 0});
-      }));
+  collection.getDocuments().then((query) => query.documents.forEach((doc) =>
+      Firestore.instance
+          .document('votes/${doc.documentID}')
+          .setData({'votes': 0})));
 }
 
 void _prettifyWebApp([bool makePretty = true]) async => Firestore.instance
-    .document('votes/web_app_settings')
+    .document('settings/web_app_settings')
     .setData({'purdy': makePretty});
 
 class Votes extends StatelessWidget {
