@@ -34,11 +34,8 @@ flutter:
     - assets/diagonal_rainbow_gradient.jpg
     - assets/fire.jpg
     - assets/snow_sparkle.jpg
-    - assets/sparkler.jpg
     - assets/colorful_lights.jpg
     - assets/ball_pit.jpg
-    - assets/light_bulb_outline_whole.png
-    - assets/light_bulb_outline.png
     - assets/light_bulb.png
   fonts:
     - family: MountainsOfChristmas
