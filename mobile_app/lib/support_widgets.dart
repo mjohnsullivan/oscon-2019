@@ -382,7 +382,7 @@ class MeteorButton extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           // TODO: does disabling this calm my computer down?
-          //Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
+          Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
           Text(
             text,
             textAlign: TextAlign.center,
