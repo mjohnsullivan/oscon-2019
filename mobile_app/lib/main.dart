@@ -5,7 +5,6 @@ import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart' as awesome;
-import 'package:rxdart/subjects.dart';
 
 void main() => runApp(WearablesApp());
 
