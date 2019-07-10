@@ -5,10 +5,9 @@ import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart' as awesome;
+import 'package:rxdart/subjects.dart';
 
-void main() {
-  runApp(WearablesApp());
-}
+void main() => runApp(WearablesApp());
 
 class WearablesApp extends StatefulWidget {
   @override
@@ -20,12 +19,24 @@ class _WearablesAppState extends State<WearablesApp> {
   //final _pages = [BluetoothPage(), Votes()];
   // FALLBACK STATE for technical difficulties:
   final _pages = [LightControl(useBluetooth: false), Votes()];
+  final votesStream = BehaviorSubject<QuerySnapshot>();
+
+  @override
+  void initState() {
+    super.initState();
+    Firestore.instance.collection('votes').snapshots().pipe(votesStream);
+  }
+
+  @override
+  void dispose() {
+    votesStream.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamProvider<QuerySnapshot>(
-        builder: (context) =>
-            Firestore.instance.collection('votes').snapshots(),
+        builder: (context) => votesStream.stream,
         child: MaterialApp(
             home: Scaffold(
           body: Center(
