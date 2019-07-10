@@ -20,8 +20,8 @@ class Bluetooth with ChangeNotifier {
   Future<void> connectToDevice(BluetoothDevice device) async {
     try {
       await device.connect(timeout: const Duration(seconds: 5));
+      await _findCharacteristic(device);
       setMode(BleAppState.connected);
-      _findCharacteristic(device);
     } on TimeoutException {
       setMode(BleAppState.failedToConnect);
     }
