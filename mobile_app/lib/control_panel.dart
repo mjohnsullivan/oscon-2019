@@ -82,15 +82,9 @@ class FailedToConnect extends StatelessWidget {
   }
 }
 
-class LightControl extends StatefulWidget {
+class LightControl extends StatelessWidget {
   LightControl({this.useBluetooth = true});
   final useBluetooth;
-  @override
-  _LightControlState createState() => _LightControlState();
-}
-
-class _LightControlState extends State<LightControl> {
-  bool _on = false;
   final int offSignal = 0x4e;
   final Map<String, int> colorCodeMap = {
     'blue': AsciiCodec().encode('b')[0],
@@ -128,82 +122,88 @@ class _LightControlState extends State<LightControl> {
       });
       if (mostPopularColor != _currentColor) {
         _currentColor = mostPopularColor;
-        if (widget.useBluetooth) {
-          bluetooth?.sendMessage(colorCodeMap[_currentColor]);
-        }
+        bluetooth?.sendMessage(colorCodeMap[_currentColor]);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var bluetooth =
-        widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
+    // A hack to allow us to develop without connecting to a bluetooth device
+    // in case of
+    var bluetooth = useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
-    // TODO: This actually needs a behavior/subject thing to init with a value.
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
           updateMostPopularColor(bluetooth, snapshot);
           return constColumn;
         },
-        child: GridView.count(
-          padding: const EdgeInsets.all(10),
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          children: <Widget>[
-            OnOffSwitch(
-              onPressed: (bool value) {
-                setState(() => _on = value);
-                // send the on/off signal: off: 0x4e
-                if (_on) {
-                  bluetooth?.sendMessage(offSignal);
-                } else {
-                  bluetooth?.sendMessage(lightSpill);
-                }
-              },
+        child: SafeArea(
+          child: Theme(
+            data: ThemeData(
+                textTheme: TextTheme(
+                    body1: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+            ))),
+            child: GridView.count(
+              padding: const EdgeInsets.all(10),
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              children: <Widget>[
+                OnOffSwitch(
+                  onPressed: (bool value) {
+                    if (value) {
+                      bluetooth?.sendMessage(offSignal);
+                    } else {
+                      bluetooth?.sendMessage(lightSpill);
+                    }
+                  },
+                ),
+                SparkleButton(
+                  text: 'Sparkle',
+                  onPressed: () => bluetooth?.sendMessage(sparkle),
+                ),
+                RainbowButton(
+                  text: 'Rainbow',
+                  onPressed: () => bluetooth?.sendMessage(rainbow),
+                ),
+                ShimmerButton(
+                  text: 'Running Lights',
+                  onPressed: () => bluetooth?.sendMessage(runningLights),
+                ),
+                //TODO
+                TwinkleButton(
+                  text: 'Twinkle',
+                  onPressed: () => bluetooth?.sendMessage(twinkle),
+                ),
+                MeteorButton(
+                  text: 'Meteor Rain',
+                  onPressed: () => bluetooth?.sendMessage(meteorFall),
+                ),
+                // TODO -- think space invaders
+                BasicButton(
+                  body: Text('March'),
+                  onPressed: () => bluetooth?.sendMessage(march),
+                ),
+                FadingButton(
+                  text: 'Breathe',
+                  onPressed: () => bluetooth?.sendMessage(breathe),
+                ),
+                FireButton(
+                  text: 'Fire',
+                  onPressed: () => bluetooth?.sendMessage(fire),
+                ),
+                BouncingBallButton(
+                  onPressed: () => bluetooth?.sendMessage(bouncingBalls),
+                ),
+                ColorFillButton(
+                    text: 'Color Fill',
+                    onPressed: () => bluetooth?.sendMessage(lightSpill)),
+              ],
             ),
-            SparkleButton(
-              text: 'Sparkle',
-              onPressed: () => bluetooth?.sendMessage(sparkle),
-            ),
-            RainbowButton(
-              text: 'Rainbow',
-              onPressed: () => bluetooth?.sendMessage(rainbow),
-            ),
-            ShimmerButton(
-              text: 'Running Lights',
-              onPressed: () => bluetooth?.sendMessage(runningLights),
-            ),
-            //TODO
-            TwinkleButton(
-              text: 'Twinkle',
-              onPressed: () => bluetooth?.sendMessage(twinkle),
-            ),
-            MeteorButton(
-              text: 'Meteor Rain',
-              onPressed: () => bluetooth?.sendMessage(meteorFall),
-            ),
-            // TODO -- think space invaders
-            BasicButton(
-              body: Text('March'),
-              onPressed: () => bluetooth?.sendMessage(march),
-            ),
-            FadingButton(
-              text: 'Breathe',
-              onPressed: () => bluetooth?.sendMessage(breathe),
-            ),
-            FireButton(
-              text: 'Fire',
-              onPressed: () => bluetooth?.sendMessage(fire),
-            ),
-            BouncingBallButton(
-              onPressed: () => bluetooth?.sendMessage(bouncingBalls),
-            ),
-            ColorFillButton(
-                text: 'Color Fill',
-                onPressed: () => bluetooth?.sendMessage(lightSpill)),
-          ],
+          ),
         ));
   }
 }

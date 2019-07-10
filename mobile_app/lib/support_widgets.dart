@@ -9,14 +9,12 @@ import 'package:fireworks/fireworks.dart';
 
 class BasicImageButton extends StatelessWidget {
   BasicImageButton(
-      {this.fontSize: 30,
-      this.fontColor = Colors.black,
+      {this.fontColor = Colors.black,
       this.background,
       this.text,
       this.onPressed,
       this.animation});
   final Color fontColor;
-  final double fontSize;
   final VoidCallback onPressed;
   final String text;
   final Widget background;
@@ -29,11 +27,7 @@ class BasicImageButton extends StatelessWidget {
         alignment: AlignmentDirectional.center,
         children: <Widget>[
           background,
-          Text(text,
-              style: TextStyle(
-                  color: fontColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize)),
+          Text(text, style: TextStyle(color: fontColor)),
           animation ?? Container(),
           Material(
             color: Colors.transparent,
@@ -95,15 +89,11 @@ class RainbowButton extends StatelessWidget {
 
 class SparkleButton extends StatelessWidget {
   SparkleButton({this.onPressed, this.text});
-
   final VoidCallback onPressed;
   final String text;
+
   @override
   Widget build(BuildContext context) {
-    var sparkleStar = SpinKitPulse(
-      itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
-    );
-
     return BasicImageButton(
       fontColor: Colors.white,
       background: Opacity(
@@ -114,7 +104,9 @@ class SparkleButton extends StatelessWidget {
       text: text,
       animation: Fireworks.only(
         numberOfExplosions: 16,
-        child: sparkleStar,
+        child: SpinKitPulse(
+          itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
+        ),
         maxHeight: 200,
         maxWidth: 200,
       ),
@@ -323,10 +315,6 @@ class _ColorFillButtonState extends State<ColorFillButton>
             child: Text(
               widget.text,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ),
         ],
@@ -357,10 +345,6 @@ class ShimmerButton extends StatelessWidget {
             child: Text(
               text,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ),
         ),
@@ -388,7 +372,6 @@ class MeteorButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 40,
               color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
             ),
           )
         ],
@@ -593,8 +576,6 @@ class _FadingButtonState extends State<FadingButton> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey[100],
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             )));
@@ -610,18 +591,16 @@ class BouncingBallButton extends StatelessWidget {
     return BasicImageButton(
       text: '',
       background: Opacity(
-          opacity: .7,
+          opacity: .5,
           child: Image.asset('assets/ball_pit.jpg',
               fit: BoxFit.cover, height: 400)),
       animation: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           JumpingText('Bouncing',
-              end: Offset(0, -.05),
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              end: Offset(0, -.05), style: TextStyle(fontSize: 36)),
           JumpingText('Balls',
-              end: Offset(0, -.05),
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+              end: Offset(0, -.05), style: TextStyle(fontSize: 36))
         ],
       ),
       onPressed: onPressed,
@@ -671,8 +650,7 @@ class _OnOffSwitchState extends State<OnOffSwitch> {
       ),
       animation: Column(children: [
         Image.asset('assets/light_bulb.png', fit: BoxFit.cover, height: 125),
-        Text(_on ? 'Lights!' : 'Off',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+        Text(_on ? 'Lights!' : 'Off', style: TextStyle(fontSize: 30))
       ]),
       text: '',
       onPressed: () {
