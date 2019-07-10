@@ -33,7 +33,7 @@ final colorMap = {
   'red': Colors.red
 };
 
-/// Manages streams
+/// Manages the Firestore data streams
 class FirebaseInstance {
   FirebaseInstance() {
     _initializeFirebase();
@@ -123,7 +123,7 @@ class FirebaseInstance {
 }
 
 void main() => runApp(
-      Provider<FirebaseInstance>.value(
+      Provider.value(
         value: FirebaseInstance(),
         child: VotingApp(),
       ),
@@ -193,7 +193,7 @@ class VotingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        VotingLabel('Vote for colour'),
+        VotingLabel('Haberdashery Color Voter!'),
         SizedBox(height: 10),
         Container(
           constraints: BoxConstraints(
