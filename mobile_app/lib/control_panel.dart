@@ -141,9 +141,9 @@ class _LightControlState extends State<LightControl> {
         widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
     // TODO: This actually needs a behavior/subject thing to init with a value.
-    return Consumer<QuerySnapshot>(
+    return Consumer<ValueNotifier<QuerySnapshot>>(
         builder: (context, snapshot, constColumn) {
-          updateMostPopularColor(bluetooth, snapshot);
+          updateMostPopularColor(bluetooth, snapshot?.value);
           return constColumn;
         },
         child: GridView.count(

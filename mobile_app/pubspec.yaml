@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cloud_firestore: ^0.12.5
-  rxdart: ^0.22.0
+  # rxdart: ^0.22.0
   provider: ^3.0.0
   fireworks: ^0.9.3
   flutter_blue:

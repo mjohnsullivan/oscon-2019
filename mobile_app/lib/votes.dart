@@ -24,8 +24,9 @@ void _prettifyWebApp([bool makePretty = true]) async => Firestore.instance
 class Votes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuerySnapshot>(builder: (context, snapshot, _) {
-      if (snapshot?.documents != null) {
+    return Consumer<ValueNotifier<QuerySnapshot>>(
+        builder: (context, snapshot, _) {
+      if (snapshot?.value?.documents != null) {
         return Column(
           children: [
             Expanded(
@@ -35,7 +36,7 @@ class Votes extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 5,
                   mainAxisSpacing: 5,
-                  children: snapshot.documents
+                  children: snapshot.value.documents
                       .where((d) => colorMap.containsKey(d.documentID))
                       .map<Widget>((d) {
                     final color = d.documentID;

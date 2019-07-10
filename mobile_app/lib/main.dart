@@ -19,24 +19,21 @@ class _WearablesAppState extends State<WearablesApp> {
   //final _pages = [BluetoothPage(), Votes()];
   // FALLBACK STATE for technical difficulties:
   final _pages = [LightControl(useBluetooth: false), Votes()];
-  final votesStream = BehaviorSubject<QuerySnapshot>();
+  final snapshotNotifier = ValueNotifier<QuerySnapshot>(null);
 
   @override
   void initState() {
     super.initState();
-    Firestore.instance.collection('votes').snapshots().pipe(votesStream);
-  }
-
-  @override
-  void dispose() {
-    votesStream.close();
-    super.dispose();
+    Firestore.instance
+        .collection('votes')
+        .snapshots()
+        .listen((snapshot) => snapshotNotifier.value = snapshot);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<QuerySnapshot>(
-        builder: (context) => votesStream.stream,
+    return ChangeNotifierProvider<ValueNotifier<QuerySnapshot>>.value(
+        value: snapshotNotifier,
         child: MaterialApp(
             home: Scaffold(
           body: Center(
