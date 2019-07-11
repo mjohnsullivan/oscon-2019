@@ -21,6 +21,13 @@ void _prettifyWebApp([bool makePretty = true]) async => Firestore.instance
     .document('settings/web_app_settings')
     .updateData({'purdy': makePretty});
 
+void _startCountdown() async =>
+    Firestore.instance.document('settings/web_app_settings').updateData({
+      'countdown': DateTime.now().add(
+        const Duration(seconds: 30),
+      )
+    });
+
 class Votes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,6 +60,7 @@ class Votes extends StatelessWidget {
             ResetVotes(),
             PrettyWebApp(),
             UglyWebApp(),
+            StartCountdown(),
           ],
         );
       } else {
@@ -88,6 +96,16 @@ class UglyWebApp extends StatelessWidget {
     return FlatButton(
       child: Text('Uglify web app'),
       onPressed: () => _prettifyWebApp(false),
+    );
+  }
+}
+
+class StartCountdown extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: Text('Start Countdown'),
+      onPressed: () => _startCountdown(),
     );
   }
 }
