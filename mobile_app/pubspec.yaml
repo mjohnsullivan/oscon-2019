@@ -20,9 +20,8 @@ dependencies:
   font_awesome_flutter: ^8.4.0
   flutter_spinkit: ^3.1.0
   shimmer: ^1.0.0
-  progress_indicators: #^0.1.4
-    git:
-      url: https://github.com/efortuna/progress_indicators
+  progress_indicators: ^0.1.4
+  animated_text_kit: ^1.3.1
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +33,7 @@ flutter:
   assets:
     - assets/diagonal_rainbow_gradient.jpg
     - assets/fire.jpg
+    - assets/road_stripes.jpg
     - assets/snow_sparkle.jpg
     - assets/colorful_lights.jpg
     - assets/ball_pit.jpg

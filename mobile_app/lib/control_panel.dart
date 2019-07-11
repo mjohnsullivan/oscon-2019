@@ -82,26 +82,44 @@ class FailedToConnect extends StatelessWidget {
   }
 }
 
-class LightControl extends StatelessWidget {
+class LightControl extends StatefulWidget {
   LightControl({this.useBluetooth = true});
   final useBluetooth;
+
+  @override
+  _LightControlState createState() => _LightControlState();
+}
+
+class _LightControlState extends State<LightControl> {
   final int offSignal = 0x4e;
+
   final Map<String, int> colorCodeMap = {
     'blue': AsciiCodec().encode('b')[0],
     'green': AsciiCodec().encode('g')[0],
     'red': AsciiCodec().encode('r')[0],
     'yellow': AsciiCodec().encode('y')[0],
   };
+
   final int lightSpill = AsciiCodec().encode('l')[0];
+
   final int sparkle = AsciiCodec().encode('s')[0];
+
   final int rainbow = AsciiCodec().encode('o')[0];
+
   final int twinkle = AsciiCodec().encode('t')[0];
+
   final int meteorFall = AsciiCodec().encode('e')[0];
+
   final int runningLights = AsciiCodec().encode('n')[0];
+
   final int march = AsciiCodec().encode('m')[0];
+
   final int breathe = AsciiCodec().encode('h')[0];
+
   final int fire = AsciiCodec().encode('f')[0];
+
   final int bouncingBalls = AsciiCodec().encode('a')[0];
+
   String _currentColor;
 
   void updateMostPopularColor(Bluetooth bluetooth, QuerySnapshot snapshot) {
@@ -131,7 +149,8 @@ class LightControl extends StatelessWidget {
   Widget build(BuildContext context) {
     // A hack to allow us to develop without connecting to a bluetooth device
     // in case of
-    var bluetooth = useBluetooth ? Provider.of<Bluetooth>(context) : null;
+    var bluetooth =
+        widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
@@ -182,9 +201,8 @@ class LightControl extends StatelessWidget {
                   text: 'Meteor Rain',
                   onPressed: () => bluetooth?.sendMessage(meteorFall),
                 ),
-                // TODO -- think space invaders
-                BasicButton(
-                  body: Text('March'),
+                MarchButton(
+                  text: 'March',
                   onPressed: () => bluetooth?.sendMessage(march),
                 ),
                 FadingButton(
@@ -205,6 +223,12 @@ class LightControl extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  @override
+  void dispose() {
+    if (widget.useBluetooth) Provider.of<Bluetooth>(context).disconnect();
+    super.dispose();
   }
 }
 

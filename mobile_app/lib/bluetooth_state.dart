@@ -16,15 +16,21 @@ class Bluetooth with ChangeNotifier {
   final devices = Map<DeviceIdentifier, ScanResult>();
   final uartWriteCharacteristic = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
   BluetoothCharacteristic _characteristic;
+  BluetoothDevice _currentDevice;
 
   Future<void> connectToDevice(BluetoothDevice device) async {
     try {
+      _currentDevice = device;
       await device.connect(timeout: const Duration(seconds: 5));
       await _findCharacteristic(device);
       setMode(BleAppState.connected);
     } on TimeoutException {
       setMode(BleAppState.failedToConnect);
     }
+  }
+
+  Future disconnect() {
+    return _currentDevice.disconnect();
   }
 
   Stream<Map<DeviceIdentifier, ScanResult>> scanForDevices() async* {
