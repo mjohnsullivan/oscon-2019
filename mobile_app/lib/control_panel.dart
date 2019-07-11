@@ -172,23 +172,22 @@ class _LightControlState extends State<LightControl> {
 
 class AvailableDevices extends StatelessWidget {
   AvailableDevices(this.availableBLEDevices);
-  final Map<blue.DeviceIdentifier, blue.ScanResult> availableBLEDevices;
+  final Iterable<blue.ScanResult> availableBLEDevices;
   @override
   Widget build(BuildContext context) {
-    return ListView(
-        children: availableBLEDevices.values
-            .where((result) => result.device.name.length > 0)
-            .map<Widget>((result) => ListTile(
-                  title: Text(result.device.name),
-                  subtitle: Text(result.device.id.toString()),
-                  onTap: () => Provider.of<Bluetooth>(context)
-                      .connectToDevice(result.device),
-                ))
-            .toList()
-              ..add(IconButton(
-                icon: Icon(Icons.refresh),
-                onPressed: () => Provider.of<Bluetooth>(context)
-                    .setMode(BleAppState.searching),
-              )));
+    return ListView(children: [
+      RefreshButton(),
+    ]);
+  }
+}
+
+class RefreshButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.refresh),
+      onPressed: () =>
+          Provider.of<Bluetooth>(context).setMode(BleAppState.searching),
+    );
   }
 }

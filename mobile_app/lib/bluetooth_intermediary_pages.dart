@@ -13,7 +13,9 @@ class ScanningPage extends StatelessWidget {
         stream: Provider.of<Bluetooth>(context).scanForDevices(),
         builder: (context, snapshot) {
           if (snapshot.hasData)
-            return Scaffold(body: AvailableDevices(snapshot.data));
+            return Scaffold(
+                body: AvailableDevices(snapshot.data.values
+                    .where((result) => result.device.name.length > 0)));
           return Scaffold(
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,

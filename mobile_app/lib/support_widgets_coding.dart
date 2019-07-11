@@ -12,12 +12,7 @@ class MarchButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
-      background: Image.asset('assets/road_stripes.jpg', fit: BoxFit.cover),
-      foreground: TyperAnimatedTextKit(
-        duration: Duration(seconds: 7),
-        text: [buttonText],
-        textStyle: TextStyle(color: Colors.white),
-      ),
+      foreground: Text(buttonText),
       onPressed: onPressed,
     );
   }
@@ -33,23 +28,11 @@ class FadingButton extends StatefulWidget {
 }
 
 class _FadingButtonState extends State<FadingButton> {
-  Color _color;
-  final Color defaultColor = Colors.blue;
-  final Color darkGrey = Colors.grey[800];
-  final Color lightGrey = Colors.grey[100];
+  static final Color defaultColor = Colors.blue;
+  static final Color darkGrey = Colors.grey[800];
+  static final Color lightGrey = Colors.grey[200];
+  Color _color = defaultColor;
   Timer _timer;
-  @override
-  void initState() {
-    _color = defaultColor;
-    _timer = Timer.periodic(Duration(seconds: 8), (_) {
-      if (_color == defaultColor) {
-        setState(() => _color = darkGrey);
-      } else {
-        setState(() => _color = defaultColor);
-      }
-    });
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -61,15 +44,12 @@ class _FadingButtonState extends State<FadingButton> {
   Widget build(BuildContext context) {
     return BasicButton(
         onPressed: widget.onPressed,
-        body: AnimatedContainer(
-            duration: Duration(seconds: 4),
-            color: _color,
-            child: Center(
-              child: Text(
-                widget.text,
-                style: TextStyle(color: lightGrey),
-              ),
-            )));
+        body: Center(
+          child: Text(
+            widget.text,
+            style: TextStyle(color: lightGrey),
+          ),
+        ));
   }
 }
 
@@ -115,20 +95,6 @@ class _ColorFillButtonState extends State<ColorFillButton>
       onPressed: widget.onPressed,
       body: Stack(
         children: <Widget>[
-          Container(
-            constraints: BoxConstraints.expand(),
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.yellow[600], Colors.yellow[800]])),
-          ),
-          SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0, -1),
-                end: Offset(0, 1),
-              ).animate(_controller),
-              child: _greenGradient),
           Center(
             child: Text(
               widget.text,
