@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
+import 'package:mobile_app/bluetooth_intermediary_pages.dart';
 import 'package:mobile_app/support_widgets.dart';
+import 'package:mobile_app/support_widgets_coding.dart';
 import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
-import 'package:progress_indicators/progress_indicators.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
@@ -30,74 +30,24 @@ class BluetoothPage extends StatelessWidget {
   }
 }
 
-/// Simple page stating that we are scanning for devices.
-class ScanningPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: Provider.of<Bluetooth>(context).scanForDevices(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData)
-            return Scaffold(body: AvailableDevices(snapshot.data));
-          return Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SpinKitWave(
-                      color: Colors.blue, type: SpinKitWaveType.end, size: 30),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Scanning for bluetooth devices'),
-                    FadingText('...'),
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
-  }
-}
-
-class FailedToConnect extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text('Unable to connect to the peripheral Bluetooth device.'),
-        RaisedButton.icon(
-          label: Text('Try again'),
-          icon: Icon(Icons.refresh),
-          onPressed: () => null,
-        ),
-        RaisedButton(
-            child: Text('Look for another device.'),
-            onPressed: () =>
-                Provider.of<Bluetooth>(context).setMode(BleAppState.searching))
-      ],
-    );
-  }
-}
-
 class LightControl extends StatefulWidget {
   LightControl({this.useBluetooth = true});
   final useBluetooth;
+
   @override
   _LightControlState createState() => _LightControlState();
 }
 
 class _LightControlState extends State<LightControl> {
-  bool _on = false;
   final int offSignal = 0x4e;
+
   final Map<String, int> colorCodeMap = {
     'blue': AsciiCodec().encode('b')[0],
     'green': AsciiCodec().encode('g')[0],
     'red': AsciiCodec().encode('r')[0],
     'yellow': AsciiCodec().encode('y')[0],
   };
+
   final int lightSpill = AsciiCodec().encode('l')[0];
   final int sparkle = AsciiCodec().encode('s')[0];
   final int rainbow = AsciiCodec().encode('o')[0];
@@ -108,6 +58,7 @@ class _LightControlState extends State<LightControl> {
   final int breathe = AsciiCodec().encode('h')[0];
   final int fire = AsciiCodec().encode('f')[0];
   final int bouncingBalls = AsciiCodec().encode('a')[0];
+
   String _currentColor;
 
   void updateMostPopularColor(Bluetooth bluetooth, QuerySnapshot snapshot) {
@@ -128,83 +79,94 @@ class _LightControlState extends State<LightControl> {
       });
       if (mostPopularColor != _currentColor) {
         _currentColor = mostPopularColor;
-        if (widget.useBluetooth) {
-          bluetooth?.sendMessage(colorCodeMap[_currentColor]);
-        }
+        bluetooth?.sendMessage(colorCodeMap[_currentColor]);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // A hack to allow us to develop without connecting to a bluetooth device
+    // in case of
     var bluetooth =
         widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
 
-    // TODO: This actually needs a behavior/subject thing to init with a value.
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
           updateMostPopularColor(bluetooth, snapshot);
           return constColumn;
         },
-        child: GridView.count(
-          padding: const EdgeInsets.all(10),
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          children: <Widget>[
-            OnOffSwitch(
-              onPressed: (bool value) {
-                setState(() => _on = value);
-                // send the on/off signal: off: 0x4e
-                if (_on) {
-                  bluetooth?.sendMessage(offSignal);
-                } else {
-                  bluetooth?.sendMessage(lightSpill);
-                }
-              },
+        child: SafeArea(
+          child: Theme(
+            data: ThemeData(
+                textTheme: TextTheme(
+                    body1: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+            ))),
+            child: GridView.count(
+              padding: const EdgeInsets.all(10),
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              children: <Widget>[
+                OnOffSwitch(
+                  onPressed: (bool value) {
+                    if (value) {
+                      bluetooth?.sendMessage(offSignal);
+                    } else {
+                      bluetooth?.sendMessage(lightSpill);
+                    }
+                  },
+                ),
+                RainbowButton(
+                  text: 'Rainbow',
+                  onPressed: () => bluetooth?.sendMessage(rainbow),
+                ),
+                MarchButton(
+                  buttonText: 'March',
+                  onPressed: () => bluetooth?.sendMessage(march),
+                ),
+                SparkleButton(
+                  text: 'Sparkle',
+                  onPressed: () => bluetooth?.sendMessage(sparkle),
+                ),
+                ShimmerButton(
+                  text: 'Running Lights',
+                  onPressed: () => bluetooth?.sendMessage(runningLights),
+                ),
+                TwinkleButton(
+                  text: 'Twinkle',
+                  onPressed: () => bluetooth?.sendMessage(twinkle),
+                ),
+                FireButton(
+                  text: 'Fire',
+                  onPressed: () => bluetooth?.sendMessage(fire),
+                ),
+                FadingButton(
+                  text: 'Breathe',
+                  onPressed: () => bluetooth?.sendMessage(breathe),
+                ),
+                ColorFillButton(
+                    text: 'Color Fill',
+                    onPressed: () => bluetooth?.sendMessage(lightSpill)),
+                BouncingBallButton(
+                  onPressed: () => bluetooth?.sendMessage(bouncingBalls),
+                ),
+                MeteorButton(
+                  text: 'Meteor Rain',
+                  onPressed: () => bluetooth?.sendMessage(meteorFall),
+                ),
+              ],
             ),
-            SparkleButton(
-              text: 'Sparkle',
-              onPressed: () => bluetooth?.sendMessage(sparkle),
-            ),
-            RainbowButton(
-              text: 'Rainbow',
-              onPressed: () => bluetooth?.sendMessage(rainbow),
-            ),
-            ShimmerButton(
-              text: 'Running Lights',
-              onPressed: () => bluetooth?.sendMessage(runningLights),
-            ),
-            //TODO
-            TwinkleButton(
-              text: 'Twinkle',
-              onPressed: () => bluetooth?.sendMessage(twinkle),
-            ),
-            MeteorButton(
-              text: 'Meteor Rain',
-              onPressed: () => bluetooth?.sendMessage(meteorFall),
-            ),
-            // TODO -- think space invaders
-            BasicButton(
-              body: Text('March'),
-              onPressed: () => bluetooth?.sendMessage(march),
-            ),
-            FadingButton(
-              text: 'Breathe',
-              onPressed: () => bluetooth?.sendMessage(breathe),
-            ),
-            FireButton(
-              text: 'Fire',
-              onPressed: () => bluetooth?.sendMessage(fire),
-            ),
-            BouncingBallButton(
-              onPressed: () => bluetooth?.sendMessage(bouncingBalls),
-            ),
-            ColorFillButton(
-                text: 'Color Fill',
-                onPressed: () => bluetooth?.sendMessage(lightSpill)),
-          ],
+          ),
         ));
+  }
+
+  @override
+  void dispose() {
+    if (widget.useBluetooth) Provider.of<Bluetooth>(context).disconnect();
+    super.dispose();
   }
 }
 

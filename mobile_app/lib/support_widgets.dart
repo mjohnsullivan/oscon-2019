@@ -9,40 +9,36 @@ import 'package:fireworks/fireworks.dart';
 
 class BasicImageButton extends StatelessWidget {
   BasicImageButton(
-      {this.fontSize: 30,
-      this.fontColor = Colors.black,
+      {this.fontColor = Colors.black,
       this.background,
-      this.text,
+      this.text = '',
       this.onPressed,
-      this.animation});
+      this.foreground});
   final Color fontColor;
-  final double fontSize;
   final VoidCallback onPressed;
   final String text;
   final Widget background;
-  final Widget animation;
+  final Widget foreground;
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          background,
-          Text(text,
-              style: TextStyle(
-                  color: fontColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize)),
-          animation ?? Container(),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onPressed,
-              onLongPress: onPressed,
-            ),
-          )
-        ],
+      child: Container(
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: <Widget>[
+            Container(child: background, height: 300),
+            Text(text, style: TextStyle(color: fontColor)),
+            foreground ?? Container(),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onPressed,
+                onLongPress: onPressed,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -85,132 +81,13 @@ class RainbowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BasicImageButton(
       fontColor: Colors.grey[800],
-      background: Image.asset('assets/diagonal_rainbow_gradient.jpg',
-          fit: BoxFit.fill, height: 400),
+      background:
+          Image.asset('assets/diagonal_rainbow_gradient.jpg', fit: BoxFit.fill),
       onPressed: onPressed,
       text: text,
     );
   }
 }
-
-class SparkleButton extends StatelessWidget {
-  SparkleButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    var sparkleStar = SpinKitPulse(
-      itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
-    );
-
-    return BasicImageButton(
-      fontColor: Colors.white,
-      background: Opacity(
-          opacity: .7,
-          child: Image.asset('assets/snow_sparkle.jpg',
-              fit: BoxFit.fill, height: 400)),
-      onPressed: onPressed,
-      text: text,
-      animation: Fireworks.only(
-        numberOfExplosions: 16,
-        child: sparkleStar,
-        maxHeight: 200,
-        maxWidth: 200,
-      ),
-    );
-  }
-}
-
-class TwinkleButton extends StatelessWidget {
-  TwinkleButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return BasicImageButton(
-      fontColor: Colors.black,
-      background: Opacity(
-          opacity: .5,
-          child: Image.asset(
-            'assets/colorful_lights.jpg',
-            fit: BoxFit.cover,
-            height: 400,
-          )),
-      onPressed: onPressed,
-      text: text,
-    );
-  }
-}
-
-// Note: the kerning will not be quite like normal text, alas!
-/*class SpellOut extends StatefulWidget {
-  SpellOut({this.text, this.duration})
-      : characters = List.generate(text.length,
-            (i) => AnimatedOpacity(opacity: 0, child: Text(text[i])));
-  final String text;
-  final Duration duration;
-  final List<Text> characters;
-
-  @override
-  _SpellOutState createState() => _SpellOutState();
-}
-
-class _SpellOutState extends State<SpellOut> {
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: widget.duration,
-      // TODO: key
-      child: Text(widget.text),
-    );
-  }
-}
-
-class Character extends StatefulWidget {
-  Character(this.character);
-  String character;
-  double _opacity = 0;
-  makeVisible() => _opacity = 1;
-  @override
-  _CharacterState createState() => _CharacterState();
-}
-
-class _CharacterState extends State<Character> {
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: Duration ,
-        opacity: widget._opacity, child: Text(widget.character));
-  }
-}*/
-/*class AnimatedGradientBackground extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final tween = MultiTrackTween([
-      Track("color1").add(Duration(seconds: 3),
-          ColorTween(begin: Color(0xffD38312), end: Colors.lightBlue.shade900)),
-      Track("color2").add(Duration(seconds: 3),
-          ColorTween(begin: Color(0xffA83279), end: Colors.blue.shade600))
-    ]);
-
-    return ControlledAnimation(
-      playback: Playback.MIRROR,
-      tween: tween,
-      duration: tween.duration,
-      builder: (context, animation) {
-        return Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [animation["color1"], animation["color2"]])),
-        );
-      },
-    );
-  }
-}*/
 
 class FireButton extends StatefulWidget {
   FireButton({this.onPressed, this.text});
@@ -263,74 +140,49 @@ class _FireButtonState extends State<FireButton> {
   }
 }
 
-class ColorFillButton extends StatefulWidget {
-  ColorFillButton({this.onPressed, this.text});
-
+class SparkleButton extends StatelessWidget {
+  SparkleButton({this.onPressed, this.text});
   final VoidCallback onPressed;
   final String text;
 
   @override
-  _ColorFillButtonState createState() => _ColorFillButtonState();
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      fontColor: Colors.white,
+      background: Opacity(
+          opacity: .7,
+          child: Image.asset('assets/snow_sparkle.jpg', fit: BoxFit.fill)),
+      onPressed: onPressed,
+      text: text,
+      foreground: Fireworks.only(
+        numberOfExplosions: 16,
+        child: SpinKitPulse(
+          itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
+        ),
+        maxHeight: 200,
+        maxWidth: 200,
+      ),
+    );
+  }
 }
 
-class _ColorFillButtonState extends State<ColorFillButton>
-    with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+class TwinkleButton extends StatelessWidget {
+  TwinkleButton({this.onPressed, this.text});
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 60),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+  final VoidCallback onPressed;
+  final String text;
   @override
   Widget build(BuildContext context) {
-    return BasicButton(
-      onPressed: widget.onPressed,
-      body: Stack(
-        children: <Widget>[
-          Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.yellow[600], Colors.yellow[800]])),
-              height: 200,
-              width: 200),
-          SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0, -1),
-                end: Offset(0, 1),
-              ).animate(_controller),
-              child: Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.green[600], Colors.green[800]])),
-                  height: 200,
-                  width: 200)),
-          Center(
-            child: Text(
-              widget.text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return BasicImageButton(
+      fontColor: Colors.black,
+      background: Opacity(
+          opacity: .4,
+          child: Image.asset(
+            'assets/colorful_lights.jpg',
+            fit: BoxFit.cover,
+          )),
+      onPressed: onPressed,
+      foreground: ScalingText(text, end: 1.3),
     );
   }
 }
@@ -357,10 +209,6 @@ class ShimmerButton extends StatelessWidget {
             child: Text(
               text,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ),
         ),
@@ -381,16 +229,11 @@ class MeteorButton extends StatelessWidget {
       backgroundColor: const Color(0xff8162f4),
       body: Stack(
         children: <Widget>[
-          // TODO: does disabling this calm my computer down?
-          //Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
+          Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
           Text(
             text,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 40,
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.grey[800]),
           )
         ],
       ),
@@ -546,62 +389,6 @@ class Particle {
   }
 }
 
-class FadingButton extends StatefulWidget {
-  FadingButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-
-  @override
-  _FadingButtonState createState() => _FadingButtonState();
-}
-
-class _FadingButtonState extends State<FadingButton> {
-  Color _color;
-  final Color defaultColor = Colors.blue;
-  Timer _timer;
-  @override
-  void initState() {
-    _color = defaultColor;
-    _timer = Timer.periodic(Duration(seconds: 8), (_) {
-      if (_color == defaultColor) {
-        setState(() => _color = Colors.grey[800]);
-      } else {
-        setState(() => _color = defaultColor);
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BasicButton(
-        onPressed: widget.onPressed,
-        body: AnimatedContainer(
-            height: 300,
-            width: 300,
-            duration: Duration(seconds: 4),
-            color: _color,
-            child: Center(
-              child: Text(
-                widget.text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey[100],
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )));
-  }
-}
-
 class BouncingBallButton extends StatelessWidget {
   BouncingBallButton({this.onPressed});
 
@@ -609,20 +396,16 @@ class BouncingBallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
-      text: '',
       background: Opacity(
-          opacity: .7,
-          child: Image.asset('assets/ball_pit.jpg',
-              fit: BoxFit.cover, height: 400)),
-      animation: Column(
+          opacity: .5,
+          child: Image.asset('assets/ball_pit.jpg', fit: BoxFit.cover)),
+      foreground: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           JumpingText('Bouncing',
-              end: Offset(0, -.05),
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              end: Offset(0, -.07), style: TextStyle(fontSize: 36)),
           JumpingText('Balls',
-              end: Offset(0, -.05),
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+              end: Offset(0, -.07), style: TextStyle(fontSize: 36))
         ],
       ),
       onPressed: onPressed,
@@ -670,10 +453,9 @@ class _OnOffSwitchState extends State<OnOffSwitch> {
                 width: 300,
               ),
       ),
-      animation: Column(children: [
+      foreground: Column(children: [
         Image.asset('assets/light_bulb.png', fit: BoxFit.cover, height: 125),
-        Text(_on ? 'Lights!' : 'Off',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+        Text(_on ? 'Lights!' : 'Off', style: TextStyle(fontSize: 30))
       ]),
       text: '',
       onPressed: () {
