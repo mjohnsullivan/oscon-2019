@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
+import 'package:mobile_app/bluetooth_intermediary_pages.dart';
 import 'package:mobile_app/support_widgets.dart';
+import 'package:mobile_app/support_widgets_coding.dart';
 import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
-import 'package:progress_indicators/progress_indicators.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
@@ -30,58 +30,6 @@ class BluetoothPage extends StatelessWidget {
   }
 }
 
-/// Simple page stating that we are scanning for devices.
-class ScanningPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: Provider.of<Bluetooth>(context).scanForDevices(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData)
-            return Scaffold(body: AvailableDevices(snapshot.data));
-          return Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SpinKitWave(
-                      color: Colors.blue, type: SpinKitWaveType.end, size: 30),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Scanning for bluetooth devices'),
-                    FadingText('...'),
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
-  }
-}
-
-class FailedToConnect extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text('Unable to connect to the peripheral Bluetooth device.'),
-        RaisedButton.icon(
-          label: Text('Try again'),
-          icon: Icon(Icons.refresh),
-          onPressed: () => null,
-        ),
-        RaisedButton(
-            child: Text('Look for another device.'),
-            onPressed: () =>
-                Provider.of<Bluetooth>(context).setMode(BleAppState.searching))
-      ],
-    );
-  }
-}
-
 class LightControl extends StatefulWidget {
   LightControl({this.useBluetooth = true});
   final useBluetooth;
@@ -101,23 +49,14 @@ class _LightControlState extends State<LightControl> {
   };
 
   final int lightSpill = AsciiCodec().encode('l')[0];
-
   final int sparkle = AsciiCodec().encode('s')[0];
-
   final int rainbow = AsciiCodec().encode('o')[0];
-
   final int twinkle = AsciiCodec().encode('t')[0];
-
   final int meteorFall = AsciiCodec().encode('e')[0];
-
   final int runningLights = AsciiCodec().encode('n')[0];
-
   final int march = AsciiCodec().encode('m')[0];
-
   final int breathe = AsciiCodec().encode('h')[0];
-
   final int fire = AsciiCodec().encode('f')[0];
-
   final int bouncingBalls = AsciiCodec().encode('a')[0];
 
   String _currentColor;
@@ -185,7 +124,7 @@ class _LightControlState extends State<LightControl> {
                   onPressed: () => bluetooth?.sendMessage(rainbow),
                 ),
                 MarchButton(
-                  text: 'March',
+                  buttonText: 'March',
                   onPressed: () => bluetooth?.sendMessage(march),
                 ),
                 SparkleButton(

@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:progress_indicators/progress_indicators.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fireworks/fireworks.dart';
 
@@ -14,12 +13,12 @@ class BasicImageButton extends StatelessWidget {
       this.background,
       this.text = '',
       this.onPressed,
-      this.animation});
+      this.foreground});
   final Color fontColor;
   final VoidCallback onPressed;
   final String text;
   final Widget background;
-  final Widget animation;
+  final Widget foreground;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -30,7 +29,7 @@ class BasicImageButton extends StatelessWidget {
           children: <Widget>[
             Container(child: background, height: 300),
             Text(text, style: TextStyle(color: fontColor)),
-            animation ?? Container(),
+            foreground ?? Container(),
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -90,72 +89,6 @@ class RainbowButton extends StatelessWidget {
   }
 }
 
-class SparkleButton extends StatelessWidget {
-  SparkleButton({this.onPressed, this.text});
-  final VoidCallback onPressed;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return BasicImageButton(
-      fontColor: Colors.white,
-      background: Opacity(
-          opacity: .7,
-          child: Image.asset('assets/snow_sparkle.jpg', fit: BoxFit.fill)),
-      onPressed: onPressed,
-      text: text,
-      animation: Fireworks.only(
-        numberOfExplosions: 16,
-        child: SpinKitPulse(
-          itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
-        ),
-        maxHeight: 200,
-        maxWidth: 200,
-      ),
-    );
-  }
-}
-
-class TwinkleButton extends StatelessWidget {
-  TwinkleButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return BasicImageButton(
-      fontColor: Colors.black,
-      background: Opacity(
-          opacity: .4,
-          child: Image.asset(
-            'assets/colorful_lights.jpg',
-            fit: BoxFit.cover,
-          )),
-      onPressed: onPressed,
-      animation: ScalingText(text, end: 1.3),
-    );
-  }
-}
-
-class MarchButton extends StatelessWidget {
-  MarchButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return BasicImageButton(
-      background: Image.asset('assets/road_stripes.jpg', fit: BoxFit.cover),
-      animation: TyperAnimatedTextKit(
-        duration: Duration(seconds: 7),
-        text: [text],
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      onPressed: onPressed,
-    );
-  }
-}
-
 class FireButton extends StatefulWidget {
   FireButton({this.onPressed, this.text});
 
@@ -207,70 +140,49 @@ class _FireButtonState extends State<FireButton> {
   }
 }
 
-class ColorFillButton extends StatefulWidget {
-  ColorFillButton({this.onPressed, this.text});
-
+class SparkleButton extends StatelessWidget {
+  SparkleButton({this.onPressed, this.text});
   final VoidCallback onPressed;
   final String text;
 
   @override
-  _ColorFillButtonState createState() => _ColorFillButtonState();
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      fontColor: Colors.white,
+      background: Opacity(
+          opacity: .7,
+          child: Image.asset('assets/snow_sparkle.jpg', fit: BoxFit.fill)),
+      onPressed: onPressed,
+      text: text,
+      foreground: Fireworks.only(
+        numberOfExplosions: 16,
+        child: SpinKitPulse(
+          itemBuilder: (_, __) => Icon(Icons.star, color: Colors.white),
+        ),
+        maxHeight: 200,
+        maxWidth: 200,
+      ),
+    );
+  }
 }
 
-class _ColorFillButtonState extends State<ColorFillButton>
-    with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+class TwinkleButton extends StatelessWidget {
+  TwinkleButton({this.onPressed, this.text});
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 60),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+  final VoidCallback onPressed;
+  final String text;
   @override
   Widget build(BuildContext context) {
-    return BasicButton(
-      onPressed: widget.onPressed,
-      body: Stack(
-        children: <Widget>[
-          Container(
-            constraints: BoxConstraints.expand(),
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.yellow[600], Colors.yellow[800]])),
-          ),
-          SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0, -1),
-                end: Offset(0, 1),
-              ).animate(_controller),
-              child: Container(
-                constraints: BoxConstraints.expand(),
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.green[600], Colors.green[800]])),
-              )),
-          Center(
-            child: Text(
-              widget.text,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+    return BasicImageButton(
+      fontColor: Colors.black,
+      background: Opacity(
+          opacity: .4,
+          child: Image.asset(
+            'assets/colorful_lights.jpg',
+            fit: BoxFit.cover,
+          )),
+      onPressed: onPressed,
+      foreground: ScalingText(text, end: 1.3),
     );
   }
 }
@@ -477,57 +389,6 @@ class Particle {
   }
 }
 
-class FadingButton extends StatefulWidget {
-  FadingButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-
-  @override
-  _FadingButtonState createState() => _FadingButtonState();
-}
-
-class _FadingButtonState extends State<FadingButton> {
-  Color _color;
-  final Color defaultColor = Colors.blue;
-  final Color darkGrey = Colors.grey[800];
-  final Color lightGrey = Colors.grey[100];
-  Timer _timer;
-  @override
-  void initState() {
-    _color = defaultColor;
-    _timer = Timer.periodic(Duration(seconds: 8), (_) {
-      if (_color == defaultColor) {
-        setState(() => _color = darkGrey);
-      } else {
-        setState(() => _color = defaultColor);
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BasicButton(
-        onPressed: widget.onPressed,
-        body: AnimatedContainer(
-            duration: Duration(seconds: 4),
-            color: _color,
-            child: Center(
-              child: Text(
-                widget.text,
-                style: TextStyle(color: lightGrey),
-              ),
-            )));
-  }
-}
-
 class BouncingBallButton extends StatelessWidget {
   BouncingBallButton({this.onPressed});
 
@@ -538,7 +399,7 @@ class BouncingBallButton extends StatelessWidget {
       background: Opacity(
           opacity: .5,
           child: Image.asset('assets/ball_pit.jpg', fit: BoxFit.cover)),
-      animation: Column(
+      foreground: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           JumpingText('Bouncing',
@@ -592,7 +453,7 @@ class _OnOffSwitchState extends State<OnOffSwitch> {
                 width: 300,
               ),
       ),
-      animation: Column(children: [
+      foreground: Column(children: [
         Image.asset('assets/light_bulb.png', fit: BoxFit.cover, height: 125),
         Text(_on ? 'Lights!' : 'Off', style: TextStyle(fontSize: 30))
       ]),
