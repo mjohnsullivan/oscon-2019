@@ -192,14 +192,9 @@ class _LightControlState extends State<LightControl> {
                   text: 'Running Lights',
                   onPressed: () => bluetooth?.sendMessage(runningLights),
                 ),
-                //TODO
                 TwinkleButton(
                   text: 'Twinkle',
                   onPressed: () => bluetooth?.sendMessage(twinkle),
-                ),
-                MeteorButton(
-                  text: 'Meteor Rain',
-                  onPressed: () => bluetooth?.sendMessage(meteorFall),
                 ),
                 MarchButton(
                   text: 'March',
@@ -219,6 +214,10 @@ class _LightControlState extends State<LightControl> {
                 ColorFillButton(
                     text: 'Color Fill',
                     onPressed: () => bluetooth?.sendMessage(lightSpill)),
+                MeteorButton(
+                  text: 'Meteor Rain',
+                  onPressed: () => bluetooth?.sendMessage(meteorFall),
+                ),
               ],
             ),
           ),

@@ -24,20 +24,22 @@ class BasicImageButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          background,
-          Text(text, style: TextStyle(color: fontColor)),
-          animation ?? Container(),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onPressed,
-              onLongPress: onPressed,
-            ),
-          )
-        ],
+      child: Container(
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: <Widget>[
+            Container(child: background, height: 300),
+            Text(text, style: TextStyle(color: fontColor)),
+            animation ?? Container(),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onPressed,
+                onLongPress: onPressed,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -80,8 +82,8 @@ class RainbowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BasicImageButton(
       fontColor: Colors.grey[800],
-      background: Image.asset('assets/diagonal_rainbow_gradient.jpg',
-          fit: BoxFit.fill, height: 400),
+      background:
+          Image.asset('assets/diagonal_rainbow_gradient.jpg', fit: BoxFit.fill),
       onPressed: onPressed,
       text: text,
     );
@@ -99,8 +101,7 @@ class SparkleButton extends StatelessWidget {
       fontColor: Colors.white,
       background: Opacity(
           opacity: .7,
-          child: Image.asset('assets/snow_sparkle.jpg',
-              fit: BoxFit.fill, height: 400)),
+          child: Image.asset('assets/snow_sparkle.jpg', fit: BoxFit.fill)),
       onPressed: onPressed,
       text: text,
       animation: Fireworks.only(
@@ -129,7 +130,6 @@ class TwinkleButton extends StatelessWidget {
           child: Image.asset(
             'assets/colorful_lights.jpg',
             fit: BoxFit.cover,
-            height: 400,
           )),
       onPressed: onPressed,
       animation: ScalingText(text, end: 1.3),
@@ -145,8 +145,7 @@ class MarchButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
-      background: Image.asset('assets/road_stripes.jpg',
-          fit: BoxFit.cover, height: 400),
+      background: Image.asset('assets/road_stripes.jpg', fit: BoxFit.cover),
       animation: TyperAnimatedTextKit(
         duration: Duration(seconds: 7),
         text: [text],
@@ -318,7 +317,7 @@ class MeteorButton extends StatelessWidget {
       backgroundColor: const Color(0xff8162f4),
       body: Stack(
         children: <Widget>[
-          //Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
+          Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
           Text(
             text,
             textAlign: TextAlign.center,
@@ -538,8 +537,7 @@ class BouncingBallButton extends StatelessWidget {
     return BasicImageButton(
       background: Opacity(
           opacity: .5,
-          child: Image.asset('assets/ball_pit.jpg',
-              fit: BoxFit.cover, height: 400)),
+          child: Image.asset('assets/ball_pit.jpg', fit: BoxFit.cover)),
       animation: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
