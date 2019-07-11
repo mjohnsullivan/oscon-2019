@@ -9,19 +9,74 @@ final colorMap = {
   'red': Colors.red
 };
 
+abstract class VoteNotifier extends ValueNotifier<int> {
+  VoteNotifier(int value, this.castVote) : super(value);
+  final Function(String) castVote;
+  void vote();
+  Color get color;
+}
+
+class GreenVoteNotifier extends VoteNotifier {
+  GreenVoteNotifier(int value, Function(String) castVote)
+      : super(value, castVote);
+
+  @override
+  void vote() => castVote('green');
+
+  @override
+  Color get color => Colors.green;
+}
+
+class BlueVoteNotifier extends VoteNotifier {
+  BlueVoteNotifier(int value, Function(String) castVote)
+      : super(value, castVote);
+
+  @override
+  void vote() => castVote('blue');
+
+  @override
+  Color get color => Colors.blue;
+}
+
+class RedVoteNotifier extends VoteNotifier {
+  RedVoteNotifier(int value, Function(String) castVote)
+      : super(value, castVote);
+
+  @override
+  void vote() => castVote('red');
+
+  @override
+  Color get color => Colors.red;
+}
+
+class YellowVoteNotifier extends VoteNotifier {
+  YellowVoteNotifier(int value, Function(String) castVote)
+      : super(value, castVote);
+
+  @override
+  void vote() => castVote('yellow');
+
+  @override
+  Color get color => Colors.yellow[700];
+}
+
 /// Manages the Firestore data streams
 class FirebaseInstance {
   FirebaseInstance() {
     _initializeFirebase();
+    blueNotifier = BlueVoteNotifier(0, castVote);
+    greenNotifier = GreenVoteNotifier(0, castVote);
+    redNotifier = RedVoteNotifier(0, castVote);
+    yellowNotifier = YellowVoteNotifier(0, castVote);
   }
   fb.App app;
   fs.Firestore store;
 
   final pretty = ValueNotifier<bool>(false);
-  final blueNotifier = ValueNotifier<int>(0);
-  final greenNotifier = ValueNotifier<int>(0);
-  final redNotifier = ValueNotifier<int>(0);
-  final yellowNotifier = ValueNotifier<int>(0);
+  BlueVoteNotifier blueNotifier;
+  GreenVoteNotifier greenNotifier;
+  RedVoteNotifier redNotifier;
+  YellowVoteNotifier yellowNotifier;
 
   void _initializeFirebase() {
     // Hack to ensure two apps are not created at the same time
@@ -59,7 +114,6 @@ class FirebaseInstance {
 
   _settingsChanged(fs.DocumentChange change) {
     if (change.doc.id == 'web_app_settings') {
-      print('Purdy is ${change.doc.data()['purdy']}');
       pretty.value = change.doc.data()['purdy'];
     }
   }
