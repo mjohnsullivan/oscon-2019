@@ -162,8 +162,25 @@ class FirebaseInstance {
         print('Countdown is UTC? ${time.isUtc}');
         print('Current time: ${DateTime.now().toUtc()}');
         activeNotifier.value = DateTime.now().isBefore(time);
+        print('Outside starting countdown');
+        _startCountdown(time.difference(DateTime.now()));
+        print('Past calling starting countdown');
       }
     }
+  }
+
+  void _startCountdown(Duration duration) async {
+    print('Starting countdown: $duration');
+    const frequency = Duration(seconds: 1);
+    var remaining = duration;
+    while (remaining >= const Duration()) {
+      print('Countdown: ${remaining.inSeconds}');
+      countdownStreamController.add(remaining.inSeconds);
+      remaining -= frequency;
+      await Future.delayed(frequency);
+    }
+    // Disable voting when timer has completed
+    activeNotifier.value = false;
   }
 
   void _colourVote(fs.DocumentChange change) {
