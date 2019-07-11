@@ -180,13 +180,17 @@ class _LightControlState extends State<LightControl> {
                     }
                   },
                 ),
-                SparkleButton(
-                  text: 'Sparkle',
-                  onPressed: () => bluetooth?.sendMessage(sparkle),
-                ),
                 RainbowButton(
                   text: 'Rainbow',
                   onPressed: () => bluetooth?.sendMessage(rainbow),
+                ),
+                MarchButton(
+                  text: 'March',
+                  onPressed: () => bluetooth?.sendMessage(march),
+                ),
+                SparkleButton(
+                  text: 'Sparkle',
+                  onPressed: () => bluetooth?.sendMessage(sparkle),
                 ),
                 ShimmerButton(
                   text: 'Running Lights',
@@ -196,24 +200,20 @@ class _LightControlState extends State<LightControl> {
                   text: 'Twinkle',
                   onPressed: () => bluetooth?.sendMessage(twinkle),
                 ),
-                MarchButton(
-                  text: 'March',
-                  onPressed: () => bluetooth?.sendMessage(march),
+                FireButton(
+                  text: 'Fire',
+                  onPressed: () => bluetooth?.sendMessage(fire),
                 ),
                 FadingButton(
                   text: 'Breathe',
                   onPressed: () => bluetooth?.sendMessage(breathe),
                 ),
-                FireButton(
-                  text: 'Fire',
-                  onPressed: () => bluetooth?.sendMessage(fire),
-                ),
-                BouncingBallButton(
-                  onPressed: () => bluetooth?.sendMessage(bouncingBalls),
-                ),
                 ColorFillButton(
                     text: 'Color Fill',
                     onPressed: () => bluetooth?.sendMessage(lightSpill)),
+                BouncingBallButton(
+                  onPressed: () => bluetooth?.sendMessage(bouncingBalls),
+                ),
                 MeteorButton(
                   text: 'Meteor Rain',
                   onPressed: () => bluetooth?.sendMessage(meteorFall),
