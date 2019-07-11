@@ -19,7 +19,7 @@ void _resetDatabase() async {
 
 void _prettifyWebApp([bool makePretty = true]) async => Firestore.instance
     .document('settings/web_app_settings')
-    .setData({'purdy': makePretty});
+    .updateData({'purdy': makePretty});
 
 class Votes extends StatelessWidget {
   @override
