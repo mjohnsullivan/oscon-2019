@@ -94,13 +94,18 @@ class VotingButton extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       child: GestureDetector(
         onTap: () => notifier.vote(),
-        child: Card(
+        child: Material(
           color: notifier.color,
           elevation: 4,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.white, width: 10),
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: CircleBorder(
+              side: BorderSide(
+            width: 10,
+            color: Colors.black38,
+          )),
+          //shape: RoundedRectangleBorder(
+          //  side: BorderSide(color: Colors.white, width: 10),
+          //  borderRadius: BorderRadius.circular(20),
+          //),
           child: Center(
             child: ScalingText('${notifier.value}'),
           ),
