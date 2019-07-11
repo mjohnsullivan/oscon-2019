@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase/firestore.dart' as fs;
@@ -9,6 +11,12 @@ final colorMap = {
   'red': Colors.red
 };
 
+/// Tracks if voting is active/enabled
+class ActiveNotifier extends ValueNotifier<bool> {
+  ActiveNotifier([bool value = false]) : super(value);
+}
+
+/// Base class for tracking color votes
 abstract class VoteNotifier extends ValueNotifier<int> {
   VoteNotifier(int value, this.castVote) : super(value);
   final Function(String) castVote;
@@ -73,6 +81,10 @@ class FirebaseInstance {
   fs.Firestore store;
 
   final pretty = ValueNotifier<bool>(false);
+  final activeNotifier = ActiveNotifier();
+  final countdownStreamController = StreamController<int>();
+
+  // Initialized in constructor
   BlueVoteNotifier blueNotifier;
   GreenVoteNotifier greenNotifier;
   RedVoteNotifier redNotifier;
@@ -112,19 +124,6 @@ class FirebaseInstance {
     });
   }
 
-  _settingsChanged(fs.DocumentChange change) {
-    if (change.doc.id == 'web_app_settings') {
-      pretty.value = change.doc.data()['purdy'];
-    }
-  }
-
-  void _colourVote(fs.DocumentChange change) {
-    final data = change.doc.data();
-    final color = change.doc.id;
-    final votes = data['votes'] as num;
-    colourNotifier(color).value = votes;
-  }
-
   ValueNotifier<int> colourNotifier(String colour) {
     switch (colour) {
       case 'yellow':
@@ -149,5 +148,28 @@ class FirebaseInstance {
         print('Color doesnt exist');
       }
     });
+  }
+
+  _settingsChanged(fs.DocumentChange change) {
+    if (change.doc.id == 'web_app_settings') {
+      if (change.doc.data().containsKey('purdy')) {
+        print('Unpdating purdy: ${change.doc.data()['purdy']}');
+        pretty.value = change.doc.data()['purdy'];
+      }
+      if (change.doc.data().containsKey('countdown')) {
+        DateTime time = change.doc.data()['countdown'];
+        print('Countdown: $time');
+        print('Countdown is UTC? ${time.isUtc}');
+        print('Current time: ${DateTime.now().toUtc()}');
+        activeNotifier.value = DateTime.now().isBefore(time);
+      }
+    }
+  }
+
+  void _colourVote(fs.DocumentChange change) {
+    final data = change.doc.data();
+    final color = change.doc.id;
+    final votes = data['votes'] as num;
+    colourNotifier(color).value = votes;
   }
 }

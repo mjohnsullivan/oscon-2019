@@ -15,18 +15,26 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        Provider.value(value: firebase),
+        // pretty/ugly ui
         ChangeNotifierProvider<ValueNotifier<bool>>.value(
             value: firebase.pretty),
+        // active/inactive voting
+        ChangeNotifierProvider.value(
+          value: firebase.activeNotifier,
+        ),
+        // blue votes
         ChangeNotifierProvider.value(
           value: firebase.blueNotifier,
         ),
+        // green votes
         ChangeNotifierProvider.value(
           value: firebase.greenNotifier,
         ),
+        // red votes
         ChangeNotifierProvider.value(
           value: firebase.redNotifier,
         ),
+        // yellow votes
         ChangeNotifierProvider.value(
           value: firebase.yellowNotifier,
         ),
@@ -51,11 +59,41 @@ class VotingApp extends StatelessWidget {
                 maxWidth: 600,
                 maxHeight: 800,
               ),
-              child: isPretty.value ? PrettyVotingPage() : SimpleVotingPage(),
+              child: InactiveOverlay(
+                child: isPretty.value ? PrettyVotingPage() : SimpleVotingPage(),
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class InactiveOverlay extends StatelessWidget {
+  InactiveOverlay({this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ActiveNotifier>(builder: (context, notifier, _) {
+      return notifier.value
+          ? child
+          : Stack(
+              children: [
+                child,
+                Container(color: Colors.black54),
+                Center(
+                  child: Text(
+                    'Voting Inactive',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 48,
+                    ),
+                  ),
+                ),
+              ],
+            );
+    });
   }
 }
