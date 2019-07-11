@@ -10,10 +10,12 @@ import 'package:mobile_app/bluetooth_state.dart';
 import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
+  BluetoothPage({this.usesBluetooth = true});
+  final bool usesBluetooth;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        builder: (_) => Bluetooth(),
+        builder: (_) => Bluetooth(usesBluetooth),
         child: Consumer<Bluetooth>(builder:
             (BuildContext context, Bluetooth bluetoothState, Widget child) {
           switch (bluetoothState.currentState) {
@@ -39,26 +41,12 @@ class LightControl extends StatefulWidget {
 }
 
 class _LightControlState extends State<LightControl> {
-  final int offSignal = 0x4e;
-
   final Map<String, int> colorCodeMap = {
     'blue': AsciiCodec().encode('b')[0],
     'green': AsciiCodec().encode('g')[0],
     'red': AsciiCodec().encode('r')[0],
     'yellow': AsciiCodec().encode('y')[0],
   };
-
-  final int lightSpill = AsciiCodec().encode('l')[0];
-  final int sparkle = AsciiCodec().encode('s')[0];
-  final int rainbow = AsciiCodec().encode('o')[0];
-  final int twinkle = AsciiCodec().encode('t')[0];
-  final int meteorFall = AsciiCodec().encode('e')[0];
-  final int runningLights = AsciiCodec().encode('n')[0];
-  final int march = AsciiCodec().encode('m')[0];
-  final int breathe = AsciiCodec().encode('h')[0];
-  final int fire = AsciiCodec().encode('f')[0];
-  final int bouncingBalls = AsciiCodec().encode('a')[0];
-
   String _currentColor;
 
   void updateMostPopularColor(Bluetooth bluetooth, QuerySnapshot snapshot) {
@@ -86,10 +74,7 @@ class _LightControlState extends State<LightControl> {
 
   @override
   Widget build(BuildContext context) {
-    // A hack to allow us to develop without connecting to a bluetooth device
-    // in case of
-    var bluetooth =
-        widget.useBluetooth ? Provider.of<Bluetooth>(context) : null;
+    var bluetooth = Provider.of<Bluetooth>(context);
 
     return Consumer<QuerySnapshot>(
         builder: (context, snapshot, constColumn) {
@@ -110,53 +95,17 @@ class _LightControlState extends State<LightControl> {
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
               children: <Widget>[
-                OnOffSwitch(
-                  onPressed: (bool value) {
-                    if (value) {
-                      bluetooth?.sendMessage(offSignal);
-                    } else {
-                      bluetooth?.sendMessage(lightSpill);
-                    }
-                  },
-                ),
-                RainbowButton(
-                  text: 'Rainbow',
-                  onPressed: () => bluetooth?.sendMessage(rainbow),
-                ),
-                MarchButton(
-                  buttonText: 'March',
-                  onPressed: () => bluetooth?.sendMessage(march),
-                ),
-                SparkleButton(
-                  text: 'Sparkle',
-                  onPressed: () => bluetooth?.sendMessage(sparkle),
-                ),
-                ShimmerButton(
-                  text: 'Running Lights',
-                  onPressed: () => bluetooth?.sendMessage(runningLights),
-                ),
-                TwinkleButton(
-                  text: 'Twinkle',
-                  onPressed: () => bluetooth?.sendMessage(twinkle),
-                ),
-                FireButton(
-                  text: 'Fire',
-                  onPressed: () => bluetooth?.sendMessage(fire),
-                ),
-                FadingButton(
-                  text: 'Breathe',
-                  onPressed: () => bluetooth?.sendMessage(breathe),
-                ),
-                ColorFillButton(
-                    text: 'Color Fill',
-                    onPressed: () => bluetooth?.sendMessage(lightSpill)),
-                BouncingBallButton(
-                  onPressed: () => bluetooth?.sendMessage(bouncingBalls),
-                ),
-                MeteorButton(
-                  text: 'Meteor Rain',
-                  onPressed: () => bluetooth?.sendMessage(meteorFall),
-                ),
+                OnOffSwitch(),
+                RainbowButton(),
+                MarchButton(),
+                SparkleButton(),
+                ShimmerButton(),
+                TwinkleButton(),
+                FireButton(),
+                FadingButton(),
+                ColorFillButton(),
+                BouncingBallButton(),
+                MeteorButton(),
               ],
             ),
           ),
