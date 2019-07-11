@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:web_app/common.dart';
 import 'package:web_app/db.dart';
 
 const buttonTextStyle = TextStyle(
@@ -35,6 +36,7 @@ class SimpleVotingPage extends StatelessWidget {
             ],
           ),
         ),
+        CountdownClock(),
       ],
     );
   }

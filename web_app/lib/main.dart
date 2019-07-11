@@ -22,6 +22,10 @@ void main() {
         ChangeNotifierProvider.value(
           value: firebase.activeNotifier,
         ),
+        // Countdown stream
+        StreamProvider.value(
+          value: firebase.countdownStream,
+        ),
         // blue votes
         ChangeNotifierProvider.value(
           value: firebase.blueNotifier,

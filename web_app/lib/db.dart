@@ -82,7 +82,8 @@ class FirebaseInstance {
 
   final pretty = ValueNotifier<bool>(false);
   final activeNotifier = ActiveNotifier();
-  final countdownStreamController = StreamController<int>();
+  final _countdownStreamController = StreamController<int>();
+  Stream<int> get countdownStream => _countdownStreamController.stream;
 
   // Initialized in constructor
   BlueVoteNotifier blueNotifier;
@@ -156,15 +157,11 @@ class FirebaseInstance {
         print('Unpdating purdy: ${change.doc.data()['purdy']}');
         pretty.value = change.doc.data()['purdy'];
       }
-      if (change.doc.data().containsKey('countdown')) {
-        DateTime time = change.doc.data()['countdown'];
-        print('Countdown: $time');
-        print('Countdown is UTC? ${time.isUtc}');
-        print('Current time: ${DateTime.now().toUtc()}');
-        activeNotifier.value = DateTime.now().isBefore(time);
-        print('Outside starting countdown');
-        _startCountdown(time.difference(DateTime.now()));
-        print('Past calling starting countdown');
+      if (change.doc.data().containsKey('countdown') && !activeNotifier.value) {
+        final now = DateTime.now();
+        final start = change.doc.data()['countdown'];
+        activeNotifier.value = now.isBefore(start);
+        _startCountdown(start.difference(now));
       }
     }
   }
@@ -175,7 +172,7 @@ class FirebaseInstance {
     var remaining = duration;
     while (remaining >= const Duration()) {
       print('Countdown: ${remaining.inSeconds}');
-      countdownStreamController.add(remaining.inSeconds);
+      _countdownStreamController.add(remaining.inSeconds);
       remaining -= frequency;
       await Future.delayed(frequency);
     }
