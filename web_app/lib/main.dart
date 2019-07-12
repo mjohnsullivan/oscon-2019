@@ -63,9 +63,7 @@ class VotingApp extends StatelessWidget {
                 maxWidth: 600,
                 maxHeight: 800,
               ),
-              child: InactiveOverlay(
-                child: isPretty.value ? PrettyVotingPage() : SimpleVotingPage(),
-              ),
+              child: SimpleVotingPage(),
             ),
           ),
         ),
