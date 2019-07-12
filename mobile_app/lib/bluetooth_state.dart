@@ -11,26 +11,37 @@ enum BleAppState {
 }
 
 class Bluetooth with ChangeNotifier {
-  BleAppState _currentState = BleAppState.searching;
+  BleAppState _currentState;
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final devices = Map<DeviceIdentifier, ScanResult>();
   final uartWriteCharacteristic = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
   BluetoothCharacteristic _characteristic;
   BluetoothDevice _currentDevice;
+  // A hack to allow us to develop without connecting to a bluetooth device
+  // in case of equipment failure.
+  bool usesBluetooth;
+
+  Bluetooth(this.usesBluetooth) {
+    if (usesBluetooth)
+      _currentState = BleAppState.searching;
+    else
+      _currentState = BleAppState.connected;
+  }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
-    try {
+    setMode(BleAppState.connected);
+    /*try {
       _currentDevice = device;
       await device.connect(timeout: const Duration(seconds: 5));
       await _findCharacteristic(device);
       setMode(BleAppState.connected);
     } on TimeoutException {
       setMode(BleAppState.failedToConnect);
-    }
+    }*/
   }
 
   Future disconnect() {
-    return _currentDevice.disconnect();
+    return _currentDevice?.disconnect();
   }
 
   Stream<Map<DeviceIdentifier, ScanResult>> scanForDevices() async* {
@@ -42,7 +53,7 @@ class Bluetooth with ChangeNotifier {
         flutterBlue
             .scan(
                 timeout:
-                    const Duration(seconds: 2) // need longer to connect? 5?
+                    const Duration(seconds: 1) // need longer to connect? 5?
                 // UART service on the Adafruit Feather M0 Bluefruit...
                 /*withServices: [
           new Guid('6E400001-B5A3-F393-­E0A9-­E50E24DCCA9E')
@@ -59,10 +70,12 @@ class Bluetooth with ChangeNotifier {
   }
 
   sendMessage(int instruction) async {
-    try {
-      _characteristic?.write([instruction]);
-    } on TimeoutException {
-      // fail silently if we don't connect :-P
+    if (usesBluetooth) {
+      try {
+        _characteristic?.write([instruction]);
+      } on TimeoutException {
+        // fail silently if we don't connect :-P
+      }
     }
   }
 

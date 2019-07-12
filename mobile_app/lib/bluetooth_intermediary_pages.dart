@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mobile_app/bluetooth_state.dart';
-import 'package:mobile_app/control_panel.dart';
+import 'package:mobile_app/control_panel_coding.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:flutter_blue/flutter_blue.dart' as blue;
 import 'package:provider/provider.dart';
 
 /// Simple page stating that we are scanning for devices.
@@ -13,7 +14,10 @@ class ScanningPage extends StatelessWidget {
         stream: Provider.of<Bluetooth>(context).scanForDevices(),
         builder: (context, snapshot) {
           if (snapshot.hasData)
-            return Scaffold(body: AvailableDevices(snapshot.data));
+            return Scaffold(
+                body: AvailableDevices(snapshot.data.values.where(
+                    (blue.ScanResult result) =>
+                        result.device.name.length > 0)));
           return Scaffold(
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,

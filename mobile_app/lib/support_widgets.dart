@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:mobile_app/bluetooth_state.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fireworks/fireworks.dart';
 
@@ -73,28 +77,22 @@ class BasicButton extends StatelessWidget {
 }
 
 class RainbowButton extends StatelessWidget {
-  RainbowButton({this.onPressed, this.text});
+  RainbowButton();
+  final int rainbow = AsciiCodec().encode('o')[0];
 
-  final VoidCallback onPressed;
-  final String text;
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
       fontColor: Colors.grey[800],
       background:
           Image.asset('assets/diagonal_rainbow_gradient.jpg', fit: BoxFit.fill),
-      onPressed: onPressed,
-      text: text,
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(rainbow),
+      text: 'Rainbow',
     );
   }
 }
 
 class FireButton extends StatefulWidget {
-  FireButton({this.onPressed, this.text});
-
-  final VoidCallback onPressed;
-  final String text;
-
   @override
   _FireButtonState createState() => _FireButtonState();
 }
@@ -102,6 +100,8 @@ class FireButton extends StatefulWidget {
 class _FireButtonState extends State<FireButton> {
   double _opacity = 0;
   Random random = Random();
+  final int fire = AsciiCodec().encode('f')[0];
+
   @override
   void initState() {
     setVisibility();
@@ -120,8 +120,8 @@ class _FireButtonState extends State<FireButton> {
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
-      onPressed: widget.onPressed,
-      text: widget.text,
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(fire),
+      text: 'Fire',
       fontColor: Colors.white,
       background: Stack(
         children: <Widget>[
@@ -140,10 +140,25 @@ class _FireButtonState extends State<FireButton> {
   }
 }
 
+class MarchButton extends StatelessWidget {
+  final int march = AsciiCodec().encode('m')[0];
+
+  @override
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      background: Image.asset('assets/road_stripes.jpg', fit: BoxFit.cover),
+      foreground: TyperAnimatedTextKit(
+        duration: Duration(seconds: 7),
+        text: ['March'],
+        textStyle: TextStyle(color: Colors.white),
+      ),
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(march),
+    );
+  }
+}
+
 class SparkleButton extends StatelessWidget {
-  SparkleButton({this.onPressed, this.text});
-  final VoidCallback onPressed;
-  final String text;
+  final int sparkle = AsciiCodec().encode('s')[0];
 
   @override
   Widget build(BuildContext context) {
@@ -152,8 +167,8 @@ class SparkleButton extends StatelessWidget {
       background: Opacity(
           opacity: .7,
           child: Image.asset('assets/snow_sparkle.jpg', fit: BoxFit.fill)),
-      onPressed: onPressed,
-      text: text,
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(sparkle),
+      text: 'Sparkle',
       foreground: Fireworks.only(
         numberOfExplosions: 16,
         child: SpinKitPulse(
@@ -167,10 +182,8 @@ class SparkleButton extends StatelessWidget {
 }
 
 class TwinkleButton extends StatelessWidget {
-  TwinkleButton({this.onPressed, this.text});
+  final int twinkle = AsciiCodec().encode('t')[0];
 
-  final VoidCallback onPressed;
-  final String text;
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
@@ -181,21 +194,20 @@ class TwinkleButton extends StatelessWidget {
             'assets/colorful_lights.jpg',
             fit: BoxFit.cover,
           )),
-      onPressed: onPressed,
-      foreground: ScalingText(text, end: 1.3),
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(twinkle),
+      foreground: ScalingText('Twinkle', end: 1.3),
     );
   }
 }
 
 class ShimmerButton extends StatelessWidget {
-  ShimmerButton({this.onPressed, this.text});
+  final int runningLights = AsciiCodec().encode('n')[0];
 
-  final VoidCallback onPressed;
-  final String text;
   @override
   Widget build(BuildContext context) {
     return BasicButton(
-      onPressed: onPressed,
+      onPressed: () =>
+          Provider.of<Bluetooth>(context).sendMessage(runningLights),
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -207,7 +219,7 @@ class ShimmerButton extends StatelessWidget {
             baseColor: Colors.grey[300],
             highlightColor: Colors.yellow[100],
             child: Text(
-              text,
+              'Running Lights',
               textAlign: TextAlign.center,
             ),
           ),
@@ -218,20 +230,18 @@ class ShimmerButton extends StatelessWidget {
 }
 
 class MeteorButton extends StatelessWidget {
-  MeteorButton({this.onPressed, this.text});
+  final int meteorFall = AsciiCodec().encode('e')[0];
 
-  final VoidCallback onPressed;
-  final String text;
   @override
   Widget build(BuildContext context) {
     return BasicButton(
-      onPressed: onPressed,
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(meteorFall),
       backgroundColor: const Color(0xff8162f4),
       body: Stack(
         children: <Widget>[
           Positioned(bottom: 1, left: 20, child: Meteor(size: Size(20, 5))),
           Text(
-            text,
+            'Meteor Rain',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[800]),
           )
@@ -390,9 +400,8 @@ class Particle {
 }
 
 class BouncingBallButton extends StatelessWidget {
-  BouncingBallButton({this.onPressed});
+  final int bouncingBalls = AsciiCodec().encode('a')[0];
 
-  final VoidCallback onPressed;
   @override
   Widget build(BuildContext context) {
     return BasicImageButton(
@@ -408,23 +417,22 @@ class BouncingBallButton extends StatelessWidget {
               end: Offset(0, -.07), style: TextStyle(fontSize: 36))
         ],
       ),
-      onPressed: onPressed,
+      onPressed: () =>
+          Provider.of<Bluetooth>(context).sendMessage(bouncingBalls),
     );
   }
 }
 
-typedef ToggleValue = void Function(bool value);
-
 class OnOffSwitch extends StatefulWidget {
-  OnOffSwitch({this.onPressed});
-
-  final ToggleValue onPressed;
+  OnOffSwitch();
   @override
   _OnOffSwitchState createState() => _OnOffSwitchState();
 }
 
 class _OnOffSwitchState extends State<OnOffSwitch> {
   bool _on = false;
+  final int offSignal = 0x4e;
+  final int lightSpill = AsciiCodec().encode('l')[0];
 
   @override
   Widget build(BuildContext context) {
@@ -460,7 +468,11 @@ class _OnOffSwitchState extends State<OnOffSwitch> {
       text: '',
       onPressed: () {
         setState(() => _on = !_on);
-        widget.onPressed(_on);
+        var bluetooth = Provider.of<Bluetooth>(context);
+        if (_on)
+          bluetooth.sendMessage(offSignal);
+        else
+          bluetooth.sendMessage(lightSpill);
       },
     );
   }
