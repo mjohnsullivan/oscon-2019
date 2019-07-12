@@ -36,13 +36,6 @@ class AvailableDevices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(children: [
-      for (var result in availableBLEDevices)
-        ListTile(
-          title: Text(result.device.name),
-          subtitle: Text(result.device.id.toString()),
-          onTap: () =>
-              Provider.of<Bluetooth>(context).connectToDevice(result.device),
-        ),
       RefreshButton(),
     ]);
   }
