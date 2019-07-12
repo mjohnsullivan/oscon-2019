@@ -59,7 +59,6 @@ class Votes extends StatelessWidget {
             ),
             ResetVotes(),
             PrettyWebApp(),
-            UglyWebApp(),
             StartCountdown(),
           ],
         );
@@ -80,22 +79,18 @@ class ResetVotes extends StatelessWidget {
   }
 }
 
-class PrettyWebApp extends StatelessWidget {
+class PrettyWebApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      child: Text('Prettify web app'),
-      onPressed: () => _prettifyWebApp(),
-    );
-  }
+  _PrettyWebAppState createState() => _PrettyWebAppState();
 }
 
-class UglyWebApp extends StatelessWidget {
+class _PrettyWebAppState extends State<PrettyWebApp> {
+  bool _pretty = false;
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      child: Text('Uglify web app'),
-      onPressed: () => _prettifyWebApp(false),
+      child: _pretty ? Text('Uglify web app') : Text('Prettify web app'),
+      onPressed: () => _prettifyWebApp(!_pretty),
     );
   }
 }
