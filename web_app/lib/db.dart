@@ -16,6 +16,11 @@ class ActiveNotifier extends ValueNotifier<bool> {
   ActiveNotifier([bool value = false]) : super(value);
 }
 
+/// Tracks current countdown value
+class CountdownNotifier extends ValueNotifier<int> {
+  CountdownNotifier([int value = 0]) : super(value);
+}
+
 /// Base class for tracking color votes
 abstract class VoteNotifier extends ValueNotifier<int> {
   VoteNotifier(int value, this.castVote) : super(value);
@@ -82,8 +87,7 @@ class FirebaseInstance {
 
   final pretty = ValueNotifier<bool>(false);
   final activeNotifier = ActiveNotifier();
-  final _countdownStreamController = StreamController<int>();
-  Stream<int> get countdownStream => _countdownStreamController.stream;
+  final countdownNotifier = CountdownNotifier();
 
   // Initialized in constructor
   BlueVoteNotifier blueNotifier;
@@ -167,12 +171,10 @@ class FirebaseInstance {
   }
 
   void _startCountdown(Duration duration) async {
-    print('Starting countdown: $duration');
     const frequency = Duration(seconds: 1);
     var remaining = duration;
     while (remaining >= const Duration()) {
-      print('Countdown: ${remaining.inSeconds}');
-      _countdownStreamController.add(remaining.inSeconds);
+      countdownNotifier.value = remaining.inSeconds;
       remaining -= frequency;
       await Future.delayed(frequency);
     }
