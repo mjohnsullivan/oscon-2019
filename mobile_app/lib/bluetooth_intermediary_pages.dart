@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mobile_app/bluetooth_state.dart';
-import 'package:mobile_app/control_panel.dart';
+import 'package:mobile_app/control_panel_coding.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:flutter_blue/flutter_blue.dart' as blue;
 import 'package:provider/provider.dart';

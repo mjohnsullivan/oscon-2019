@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mobile_app/bluetooth_state.dart';
@@ -135,6 +136,23 @@ class _FireButtonState extends State<FireButton> {
               )),
         ],
       ),
+    );
+  }
+}
+
+class MarchButton extends StatelessWidget {
+  final int march = AsciiCodec().encode('m')[0];
+
+  @override
+  Widget build(BuildContext context) {
+    return BasicImageButton(
+      background: Image.asset('assets/road_stripes.jpg', fit: BoxFit.cover),
+      foreground: TyperAnimatedTextKit(
+        duration: Duration(seconds: 7),
+        text: ['March'],
+        textStyle: TextStyle(color: Colors.white),
+      ),
+      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(march),
     );
   }
 }

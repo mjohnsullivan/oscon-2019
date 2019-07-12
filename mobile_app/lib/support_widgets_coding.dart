@@ -1,23 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/bluetooth_state.dart';
 import 'package:mobile_app/support_widgets.dart';
 import 'package:provider/provider.dart';
-
-class MarchButton extends StatelessWidget {
-  final int march = AsciiCodec().encode('m')[0];
-
-  @override
-  Widget build(BuildContext context) {
-    return BasicImageButton(
-      foreground: Text('March'),
-      onPressed: () => Provider.of<Bluetooth>(context).sendMessage(march),
-    );
-  }
-}
 
 class FadingButton extends StatefulWidget {
   FadingButton({this.onPressed, this.text});

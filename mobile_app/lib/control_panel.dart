@@ -1,13 +1,12 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart' as blue;
 import 'package:mobile_app/bluetooth_intermediary_pages.dart';
-import 'package:mobile_app/support_widgets.dart';
-import 'package:mobile_app/support_widgets_coding.dart';
+import 'package:mobile_app/control_panel_coding.dart';
 import 'package:mobile_app/votes.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_app/bluetooth_state.dart';
-import 'dart:convert';
 
 class BluetoothPage extends StatelessWidget {
   BluetoothPage({this.usesBluetooth = true});
@@ -24,7 +23,7 @@ class BluetoothPage extends StatelessWidget {
             case BleAppState.failedToConnect:
               return FailedToConnect();
             case BleAppState.connected:
-              return LightControl();
+              return Controls();
             case BleAppState.searching:
               return ScanningPage();
           }
@@ -32,15 +31,12 @@ class BluetoothPage extends StatelessWidget {
   }
 }
 
-class LightControl extends StatefulWidget {
-  LightControl({this.useBluetooth = true});
-  final useBluetooth;
-
+class Controls extends StatefulWidget {
   @override
-  _LightControlState createState() => _LightControlState();
+  _ControlsState createState() => _ControlsState();
 }
 
-class _LightControlState extends State<LightControl> {
+class _ControlsState extends State<Controls> {
   final Map<String, int> colorCodeMap = {
     'blue': AsciiCodec().encode('b')[0],
     'green': AsciiCodec().encode('g')[0],
@@ -67,7 +63,7 @@ class _LightControlState extends State<LightControl> {
       });
       if (mostPopularColor != _currentColor) {
         _currentColor = mostPopularColor;
-        bluetooth?.sendMessage(colorCodeMap[_currentColor]);
+        bluetooth.sendMessage(colorCodeMap[_currentColor]);
       }
     }
   }
@@ -82,61 +78,19 @@ class _LightControlState extends State<LightControl> {
           return constColumn;
         },
         child: SafeArea(
-          child: Theme(
-            data: ThemeData(
-                textTheme: TextTheme(
-                    body1: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-            ))),
-            child: GridView.count(
-              padding: const EdgeInsets.all(10),
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              children: <Widget>[
-                OnOffSwitch(),
-                RainbowButton(),
-                MarchButton(),
-                SparkleButton(),
-                ShimmerButton(),
-                TwinkleButton(),
-                FireButton(),
-                FadingButton(),
-                ColorFillButton(),
-                BouncingBallButton(),
-                MeteorButton(),
-              ],
-            ),
-          ),
-        ));
+            child: Theme(
+                data: ThemeData(
+                    textTheme: TextTheme(
+                        body1: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                ))),
+                child: LightControl())));
   }
 
   @override
   void dispose() {
-    if (widget.useBluetooth) Provider.of<Bluetooth>(context).disconnect();
+    Provider.of<Bluetooth>(context).disconnect();
     super.dispose();
-  }
-}
-
-class AvailableDevices extends StatelessWidget {
-  AvailableDevices(this.availableBLEDevices);
-  final Iterable<blue.ScanResult> availableBLEDevices;
-  @override
-  Widget build(BuildContext context) {
-    return ListView(children: [
-      RefreshButton(),
-    ]);
-  }
-}
-
-class RefreshButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.refresh),
-      onPressed: () =>
-          Provider.of<Bluetooth>(context).setMode(BleAppState.searching),
-    );
   }
 }
