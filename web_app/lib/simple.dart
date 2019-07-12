@@ -36,7 +36,12 @@ class SimpleVotingPage extends StatelessWidget {
             ],
           ),
         ),
-        CountdownClock(),
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: CountdownClock(
+            styling: labelTextStyle,
+          ),
+        ),
       ],
     );
   }
@@ -86,16 +91,17 @@ class YellowVotingButton extends StatelessWidget {
   }
 }
 
+/// Styling for color voting buttons
 class VotingButton extends StatelessWidget {
-  VotingButton(this.notifier);
-  final VoteNotifier notifier;
+  VotingButton(this.votes);
+  final VoteNotifier votes;
 
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      color: notifier.color,
-      child: Text('${notifier.value}', style: buttonTextStyle),
-      onPressed: () => notifier.vote(),
+      color: votes.color,
+      child: Text('${votes.value}', style: buttonTextStyle),
+      onPressed: () => votes.vote(),
     );
   }
 }

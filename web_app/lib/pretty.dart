@@ -38,7 +38,12 @@ class PrettyVotingPage extends StatelessWidget {
             ],
           ),
         ),
-        CountdownClock(),
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: CountdownClock(
+            styling: labelTextStyle,
+          ),
+        ),
       ],
     );
   }
@@ -88,18 +93,19 @@ class YellowVotingButton extends StatelessWidget {
   }
 }
 
+/// Styling for color voting buttons
 class VotingButton extends StatelessWidget {
-  VotingButton(this.notifier);
-  final VoteNotifier notifier;
+  VotingButton(this.votes);
+  final VoteNotifier votes;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: GestureDetector(
-        onTap: () => notifier.vote(),
+        onTap: () => votes.vote(),
         child: Material(
-          color: notifier.color,
+          color: votes.color,
           elevation: 4,
           shape: CircleBorder(
               side: BorderSide(
@@ -111,7 +117,7 @@ class VotingButton extends StatelessWidget {
           //  borderRadius: BorderRadius.circular(20),
           //),
           child: Center(
-            child: ScalingText('${notifier.value}'),
+            child: ScalingText('${votes.value}'),
           ),
         ),
       ),
