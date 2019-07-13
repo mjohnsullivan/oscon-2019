@@ -519,8 +519,8 @@ void runningLights(int timeDelay) {
         //strip.setPixelColor((i,level,0,0, 0);
         //float level = sin(i+cur_pos) * 127 + 128;
         float value = (sin(i+cur_pos) * 127 + 128)/255;
-        strip.setPixelColor(i,value*r,
-                              value*g,
+        strip.setPixelColor(i,value*g,
+                              value*r,
                               value*b,
                               value*w);
       }
