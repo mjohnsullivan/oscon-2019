@@ -45,15 +45,13 @@ class Bluetooth with ChangeNotifier {
   }
 
   Stream<Map<DeviceIdentifier, ScanResult>> scanForDevices() async* {
-    yield null;
     var done = Completer<Map<DeviceIdentifier, ScanResult>>();
+
     if (await flutterBlue.isAvailable) {
       if (!await flutterBlue.isScanning.first) {
         devices.clear();
         flutterBlue
-            .scan(
-                timeout:
-                    const Duration(seconds: 1) // need longer to connect? 5?
+            .scan(timeout: const Duration(seconds: 1) // need longer to connect?
                 // UART service on the Adafruit Feather M0 Bluefruit...
                 /*withServices: [
           new Guid('6E400001-B5A3-F393-­E0A9-­E50E24DCCA9E')
