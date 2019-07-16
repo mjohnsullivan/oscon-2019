@@ -35,9 +35,7 @@ class AvailableDevices extends StatelessWidget {
   final Iterable<blue.ScanResult> availableBLEDevices;
   @override
   Widget build(BuildContext context) {
-    return ListView(children: [
-      RefreshButton(),
-    ]);
+    return RefreshButton();
   }
 }
 
