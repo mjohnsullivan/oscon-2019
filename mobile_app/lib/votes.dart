@@ -90,7 +90,10 @@ class _PrettyWebAppState extends State<PrettyWebApp> {
   Widget build(BuildContext context) {
     return FlatButton(
       child: _pretty ? Text('Uglify web app') : Text('Prettify web app'),
-      onPressed: () => _prettifyWebApp(!_pretty),
+      onPressed: () {
+        setState(() => _pretty = !_pretty);
+        _prettifyWebApp(!_pretty);
+      },
     );
   }
 }
