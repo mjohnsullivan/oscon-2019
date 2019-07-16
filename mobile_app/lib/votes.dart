@@ -92,7 +92,7 @@ class _PrettyWebAppState extends State<PrettyWebApp> {
       child: _pretty ? Text('Uglify web app') : Text('Prettify web app'),
       onPressed: () {
         setState(() => _pretty = !_pretty);
-        _prettifyWebApp(!_pretty);
+        _prettifyWebApp(_pretty);
       },
     );
   }
