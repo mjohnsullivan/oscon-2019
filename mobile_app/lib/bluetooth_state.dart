@@ -46,10 +46,11 @@ class Bluetooth with ChangeNotifier {
 
   Stream<Map<DeviceIdentifier, ScanResult>> scanForDevices() async* {
     var done = Completer<Map<DeviceIdentifier, ScanResult>>();
-
+    var device = FakeBluetoothDevice();
+    devices[device.id] = ScanResult(device: device);
     if (await flutterBlue.isAvailable) {
       if (!await flutterBlue.isScanning.first) {
-        devices.clear();
+        //devices.clear();
         flutterBlue
             .scan(timeout: const Duration(seconds: 1) // need longer to connect?
                 // UART service on the Adafruit Feather M0 Bluefruit...
@@ -97,4 +98,42 @@ class Bluetooth with ChangeNotifier {
   }
 
   BleAppState get currentState => _currentState;
+}
+
+class FakeBluetoothDevice implements BluetoothDevice {
+  @override
+  Future<bool> get canSendWriteWithoutResponse => null;
+
+  @override
+  Future<void> connect({Duration timeout, bool autoConnect = true}) {
+    return null;
+  }
+
+  @override
+  Future disconnect() {
+    return null;
+  }
+
+  @override
+  Future<List<BluetoothService>> discoverServices() {
+    return null;
+  }
+
+  @override
+  DeviceIdentifier get id => DeviceIdentifier('E1:BB:93:22:68:B8');
+
+  @override
+  Stream<bool> get isDiscoveringServices => null;
+
+  @override
+  String get name => 'Adafruit Bluefruit LE';
+
+  @override
+  Stream<List<BluetoothService>> get services => null;
+
+  @override
+  Stream<BluetoothDeviceState> get state => null;
+
+  @override
+  BluetoothDeviceType get type => null;
 }
